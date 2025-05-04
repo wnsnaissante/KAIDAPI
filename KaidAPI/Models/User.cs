@@ -5,10 +5,10 @@ namespace KaidAPI.Models;
 public class User
 {
     [Key]
-    public string UserID { get; set; }
+    public Guid UserID { get; set; }
     
     [Required]
-    [MaxLength(20)]
+    [MaxLength(50)]
     public string Username { get; set; }
     
     [Required]
@@ -16,4 +16,9 @@ public class User
     public string Email { get; set; }
     
     public DateTime CreatedAt { get; set; }
+    
+    [MaxLength(255)]
+    public string? AuthentikIssuer { get; set; }
+    [MaxLength(255)]
+    public string? AuthentikSubject { get; set; }
 }

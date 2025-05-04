@@ -7,7 +7,7 @@ public class Project
     public string ProjectId { get; set; }
     public string ProjectName { get; set; }
     public string ProjectDescription { get; set; }
-    public string OwnerID { get; set; }
+    public Guid OwnerID { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime DueDate { get; set; }
     

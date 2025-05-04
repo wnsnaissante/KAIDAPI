@@ -5,7 +5,7 @@ public class Task
     public string TaskID { get; set; }
     public string TaskName { get; set; }
     public string TaskDescription { get; set; }
-    public string Assignee { get; set; }
+    public Guid Assignee { get; set; }
     public string StatusID { get; set; }
     public int Priority { get; set; }
     public DateTime DueDate { get; set; }
