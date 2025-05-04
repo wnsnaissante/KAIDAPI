@@ -16,7 +16,7 @@ public class Program
         string? connectionString = builder.Configuration.GetConnectionString("MySql");
         builder.Services.AddDbContext<ServerDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-        
+        builder.Services.AddControllers();
         builder.Services.AddAuthorization();
         builder.Services.AddAuthentication(options =>
             {
@@ -63,11 +63,12 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+        app.MapControllers();
+        
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
-        
-        app.MapGet("/", [Authorize] () => "Hello, Authorized World!");
+
         app.Run();
     }
 }
