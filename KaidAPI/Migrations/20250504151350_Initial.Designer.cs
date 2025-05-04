@@ -4,6 +4,7 @@ using KaidAPI.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KaidAPI.Migrations
 {
     [DbContext(typeof(ServerDbContext))]
-    partial class ServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250504151350_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,9 +36,8 @@ namespace KaidAPI.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("OwnerID")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
+                    b.Property<Guid>("OwnerID")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("ProjectDescription")
                         .IsRequired()
@@ -54,7 +56,16 @@ namespace KaidAPI.Migrations
 
             modelBuilder.Entity("KaidAPI.Models.User", b =>
                 {
-                    b.Property<string>("UserID")
+                    b.Property<Guid>("UserID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("AuthentikIssuer")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("AuthentikSubject")
+                        .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("CreatedAt")

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KaidAPI.Migrations
 {
     [DbContext(typeof(ServerDbContext))]
-    [Migration("20250503072129_Initial")]
-    partial class Initial
+    [Migration("20250504165735_UpdateUsernameMaxLength")]
+    partial class UpdateUsernameMaxLength
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,9 +36,8 @@ namespace KaidAPI.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("OwnerID")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
+                    b.Property<Guid>("OwnerID")
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("ProjectDescription")
                         .IsRequired()
@@ -57,7 +56,16 @@ namespace KaidAPI.Migrations
 
             modelBuilder.Entity("KaidAPI.Models.User", b =>
                 {
-                    b.Property<string>("UserID")
+                    b.Property<Guid>("UserID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("AuthentikIssuer")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("AuthentikSubject")
+                        .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -70,8 +78,8 @@ namespace KaidAPI.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("UserID");
 

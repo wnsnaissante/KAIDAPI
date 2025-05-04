@@ -18,13 +18,16 @@ namespace KaidAPI.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserID = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserID = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Username = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    AuthentikIssuer = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    AuthentikSubject = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -42,8 +45,7 @@ namespace KaidAPI.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ProjectDescription = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    OwnerID = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    OwnerID = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
