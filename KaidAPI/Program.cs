@@ -1,13 +1,12 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using KaidAPI.Context;
+using KaidAPI.Repositories;
 using KaidAPI.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 
 namespace KaidAPI;
 
@@ -15,123 +14,139 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         var builder = WebApplication.CreateBuilder(args);
         string? connectionString = builder.Configuration.GetConnectionString("MySql");
+        var oidcConfig = builder.Configuration.GetSection("OpenIDConnectSettings"); 
+
         builder.Services.AddDbContext<ServerDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+        
         builder.Services.AddControllers();
         builder.Services.AddScoped<IKaidUserService, KaidUserService>();
-        
-        builder.Services.AddAuthorization();
+        builder.Services.AddScoped<IProjectService, ProjectService>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+
         builder.Services.AddAuthentication(options =>
             {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddCookie()
-            .AddOpenIdConnect(options =>
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => 
             {
-                var oidcConfig = builder.Configuration.GetSection("OpenIDConnectSettings");
-                options.RequireHttpsMetadata = true;
-                
-                options.BackchannelHttpHandler = new HttpClientHandler
-                {
-                    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-                };
                 options.Authority = oidcConfig["Authority"];
-                options.ClientId = oidcConfig["ClientId"];
-                options.ClientSecret = oidcConfig["ClientSecret"];
 
-                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.ResponseType = OpenIdConnectResponseType.Code;
-                
-                options.Scope.Clear();
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
-                options.Scope.Add("email");
-                options.SaveTokens = true;
-                
-                options.CallbackPath = "/signin-oidc"; 
-                options.SignedOutCallbackPath = "/signout-callback-oidc"; 
-                options.GetClaimsFromUserInfoEndpoint = true;
+                options.Audience = oidcConfig["ClientId"]; 
 
-                options.MapInboundClaims = true;
-                options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
-                options.TokenValidationParameters.RoleClaimType = "roles";
-
-                options.Events = new OpenIdConnectEvents
+                if (builder.Environment.IsDevelopment())
                 {
-                    OnTokenValidated = async context =>
+                    options.RequireHttpsMetadata = false; 
+                    options.BackchannelHttpHandler = new HttpClientHandler
                     {
+                        ServerCertificateCustomValidationCallback = 
+                            HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                    };
+                }
+                else
+                {
+                    options.RequireHttpsMetadata = true; 
+                }
+
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true, 
+                    ValidateIssuerSigningKey = true, 
+                    NameClaimType = "sub"
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context => 
+                    {
+                        
                         var userService = context.HttpContext.RequestServices.GetRequiredService<IKaidUserService>();
                         var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
-                        var logger = loggerFactory.CreateLogger("OidcEvents.OnTokenValidated");
-                        var issuer = context.Principal?.FindFirstValue("iss");
-                        var subject =
-                            context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
-                        var email = context.Principal?.FindFirstValue(ClaimTypes.Email);
-                        var name = context.Principal?.FindFirstValue("preferred_username") ?? "Unknown";
+                        var logger = loggerFactory.CreateLogger("JwtBearerEvents.OnTokenValidated");
 
+                        var principal = context.Principal;
+                        var issuer = principal?.FindFirstValue("iss");
+                        var subject = principal?.FindFirstValue(ClaimTypes.NameIdentifier); 
                         if (string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(subject))
                         {
-                            logger.LogError("Issuer or Subject claim is missing in OnTokenValidated.");
-                            context.Fail("Required identity claims are missing.");
+                            logger.LogWarning("Issuer or Subject claim is missing in JWT OnTokenValidated.");
+                            context.Fail("Required identity claims are missing in JWT."); 
                             return;
                         }
-
+                        
+                        var email = principal?.FindFirstValue(ClaimTypes.Email);
+                        var name = principal?.FindFirstValue("preferred_username") 
+                                   ?? principal?.FindFirstValue(ClaimTypes.Name) 
+                                   ?? "Unknown";
                         try
                         {
-                            Guid localUserId =
-                                await userService.FindOrCreateUserByOidcAsync(issuer, subject, email, name);
-                            logger.LogInformation("User found or created with local Kaid UserID: {UserId}",
-                                localUserId);
-                            
-                            var claims = new List<Claim>
+                            Guid localUserId = await userService.FindOrCreateUserByOidcAsync(issuer, subject, email, name);
+                            logger.LogInformation("User mapping for JWT: Kaid UserId {UserId} for subject {Subject}", localUserId, subject);
+
+                            var claimsIdentity = principal.Identity as ClaimsIdentity;
+                            if (claimsIdentity != null && !claimsIdentity.HasClaim(c => c.Type == "kaid_user_id"))
                             {
-                                new Claim("kaid_user_id", localUserId.ToString()),
-                                
-                                new Claim(ClaimTypes.NameIdentifier, subject),
-                                new Claim(ClaimTypes.Email, email ?? ""),
-                                new Claim(ClaimTypes.Name, name ?? "")
-                            };
-
-                            var claimsIdentity = new ClaimsIdentity(claims,
-                                CookieAuthenticationDefaults.AuthenticationScheme);
-                            var localClaimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-
-                            await context.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                                localClaimsPrincipal);
-
-
-                            logger.LogInformation("Local session created successfully for Kaid UserID: {UserId}",
-                                localUserId);
-
+                                claimsIdentity.AddClaim(new Claim("kaid_user_id", localUserId.ToString()));
+                            }
                         }
                         catch (Exception ex)
                         {
-                            logger.LogError(ex,
-                                "Error processing OIDC token validation for issuer {Issuer}, subject {Subject}.",
-                                issuer, subject);
-                            context.Fail("An error occurred while processing your sign-in.");
+                            logger.LogError(ex, "Error processing JWT token validation for local user mapping. Issuer: {Issuer}, Subject: {Subject}", issuer, subject);
+                            context.Fail("An error occurred while processing your JWT.");
                         }
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger("JwtBearerEvents.OnAuthenticationFailed");
+                        logger.LogError(context.Exception, "JWT Authentication Failed.");
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger("JwtBearerEvents.OnChallenge");
+                        logger.LogWarning("JWT Authentication challenge triggered. Path: {Path}", context.Request.Path);
+                        return Task.CompletedTask;
                     }
                 };
             });
         
+        builder.Services.AddAuthorization(options =>
+        {
+            options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme) 
+                .RequireAuthenticatedUser()
+                .Build();
+        });
+            
         var app = builder.Build();
         
         if (app.Environment.IsDevelopment())
         {
-
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error"); 
+            app.UseHsts();
         }
 
         app.UseHttpsRedirection();
         app.UseRouting();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.MapControllers();
-        app.MapGet("/", () => "Hello! This is the public homepage.").RequireAuthorization();
+
+        app.UseAuthentication(); 
+        app.UseAuthorization(); 
+        
+        app.MapControllers().RequireAuthorization(); 
 
         app.Run();
     }
