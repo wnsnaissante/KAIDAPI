@@ -5,7 +5,7 @@ namespace KaidAPI.Models;
 public class User
 {
     [Key]
-    public Guid UserID { get; set; }
+    public Guid UserId { get; set; }
     
     [Required]
     [MaxLength(50)]

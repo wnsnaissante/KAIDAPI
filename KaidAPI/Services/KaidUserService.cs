@@ -27,8 +27,8 @@ public class KaidUserService : IKaidUserService
 
             if (existingUser != null)
             {
-                _logger.LogInformation("Found existing user with Kaid UserID: {UserId} for Issuer: {Issuer}, Subject: {Subject}", existingUser.UserID, issuer, subject);
-                return existingUser.UserID;
+                _logger.LogInformation("Found existing user with Kaid UserID: {UserId} for Issuer: {Issuer}, Subject: {Subject}", existingUser.UserId, issuer, subject);
+                return existingUser.UserId;
             }
 
             _logger.LogInformation("No existing user found. Creating new user for Issuer: {Issuer}, Subject: {Subject}", issuer, subject);
@@ -38,7 +38,7 @@ public class KaidUserService : IKaidUserService
                 var newUserIdGuid = Guid.NewGuid();
                 var newUser = new User
                 {
-                    UserID = newUserIdGuid,
+                    UserId = newUserIdGuid,
                     Username = name ?? $"user_{newUserIdGuid.ToString("N").Substring(0, 8)}",
                     Email = email,
                     CreatedAt = DateTime.UtcNow,
@@ -49,7 +49,7 @@ public class KaidUserService : IKaidUserService
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("New user created with Kaid UserID: {UserId}, linked to Issuer: {Issuer}, Subject: {Subject}", newUser.UserID, issuer, subject);
+                _logger.LogInformation("New user created with Kaid UserID: {UserId}, linked to Issuer: {Issuer}, Subject: {Subject}", newUser.UserId, issuer, subject);
                 
                 return newUserIdGuid;
             }
