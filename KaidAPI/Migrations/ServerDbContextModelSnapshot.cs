@@ -52,43 +52,6 @@ namespace KaidAPI.Migrations
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("KaidAPI.Models.ProjectTask", b =>
-                {
-                    b.Property<string>("TaskID")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<Guid>("Assignee")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
-                    b.Property<string>("StatusID")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("TaskDescription")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("TaskName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("TaskID");
-
-                    b.ToTable("ProjectTasks");
-                });
-
             modelBuilder.Entity("KaidAPI.Models.User", b =>
                 {
                     b.Property<Guid>("UserId")
