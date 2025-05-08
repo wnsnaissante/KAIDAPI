@@ -61,7 +61,7 @@ public class ProjectService : IProjectService
         }
     }
 
-    public async Task<OperationResult> EditProjectAsync(ProjectRequest projectRequest, string oidcSub)
+    public async Task<OperationResult> UpdateProjectAsync(ProjectRequest projectRequest, string oidcSub)
     {
         try
         {
@@ -72,7 +72,12 @@ public class ProjectService : IProjectService
                 return new OperationResult { Success = false, Message = "User not found" };
             }
 
-            var existingProject = await _projectRepository.GetProjectByIdAsync(projectRequest.ProjectId);
+            if (projectRequest.ProjectId == null)
+            {
+                return new OperationResult { Success = false, Message = "Project ID is required" };
+            }
+
+            var existingProject = await _projectRepository.GetProjectByIdAsync(projectRequest.ProjectId.Value);
             if (existingProject == null)
             {
                 return new OperationResult { Success = false, Message = "Project not found" };
@@ -85,11 +90,12 @@ public class ProjectService : IProjectService
 
             var project = new Project()
             {
-                ProjectId = projectRequest.ProjectId,
+                ProjectId = projectRequest.ProjectId.Value,
                 ProjectName = projectRequest.ProjectName,
                 ProjectDescription = projectRequest.ProjectDescription,
                 DueDate = projectRequest.DueDate,
-                OwnerId = user.UserId
+                OwnerId = user.UserId,
+                CreatedAt = existingProject.CreatedAt
             };
             await _projectRepository.UpdateProjectAsync(project);
             return new OperationResult { Success = true, Message = "Project updated successfully" };

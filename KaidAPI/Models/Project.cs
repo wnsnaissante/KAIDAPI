@@ -9,8 +9,8 @@ public class Project
     public string ProjectDescription { get; set; }
     public Guid OwnerId { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime DueDate { get; set; }
+    public DateTime? DueDate { get; set; }
     
-    [ForeignKey("OwnerID")]
+    [ForeignKey("OwnerId")]
     public User Owner { get; set; }
 }
