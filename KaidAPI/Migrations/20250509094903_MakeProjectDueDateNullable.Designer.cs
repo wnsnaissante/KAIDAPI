@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KaidAPI.Migrations
 {
     [DbContext(typeof(ServerDbContext))]
-    [Migration("20250508004210_MakeProjectDueDateNullable")]
+    [Migration("20250509094903_MakeProjectDueDateNullable")]
     partial class MakeProjectDueDateNullable
     {
         /// <inheritdoc />
