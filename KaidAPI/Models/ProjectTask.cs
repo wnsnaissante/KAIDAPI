@@ -1,7 +1,9 @@
 ﻿namespace KaidAPI.Models;
+using System.ComponentModel.DataAnnotations;
 
-public class Task
+public class ProjectTask
 {
+    [Key]
     public string TaskID { get; set; }
     public string TaskName { get; set; }
     public string TaskDescription { get; set; }
