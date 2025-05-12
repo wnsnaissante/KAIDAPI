@@ -10,4 +10,5 @@ public class ServerDbContext: DbContext
     
     public DbSet<User> Users { get; set; }
     public DbSet<Project> Projects { get; set; }
+    public DbSet<ProjectTask> ProjectTasks { get; set; }
 }
