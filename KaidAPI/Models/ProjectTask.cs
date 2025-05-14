@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 public class ProjectTask
 {
+    [Key]
     public string TaskId { get; set; }
     public string TaskName { get; set; }
     public string TaskDescription { get; set; }
