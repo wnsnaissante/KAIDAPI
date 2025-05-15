@@ -1,3 +1,7 @@
+using KaidAPI.Models;
+
+namespace KaidAPI.Repositories;
+
 public interface ITeamRepository
 {
     Task<OperationResult> CreateTeamAsync(Team team);

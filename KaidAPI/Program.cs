@@ -27,6 +27,7 @@ public class Program
         builder.Services.AddScoped<IProjectService, ProjectService>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+        builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
 
         builder.Services.AddAuthentication(options =>
             {

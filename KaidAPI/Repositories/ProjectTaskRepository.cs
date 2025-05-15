@@ -19,7 +19,7 @@ public class ProjectTaskRepository : IProjectTaskRepository
         task.UpdatedAt = DateTime.UtcNow;
         _context.ProjectTasks.Add(task);
         await _context.SaveChangesAsync();
-        return task.TaskID;
+        return task.TaskId;
     }
 
     public async Task<ProjectTask> GetProjectTaskByIdAsync(string taskId)
@@ -34,13 +34,13 @@ public class ProjectTaskRepository : IProjectTaskRepository
 
     public async Task UpdateProjectTaskAsync(ProjectTask task)
     {
-        var existing = await _context.ProjectTasks.FindAsync(task.TaskID);
+        var existing = await _context.ProjectTasks.FindAsync(task.TaskId);
         if (existing != null)
         {
             existing.TaskName = task.TaskName;
             existing.TaskDescription = task.TaskDescription;
             existing.Assignee = task.Assignee;
-            existing.StatusID = task.StatusID;
+            existing.StatusId = task.StatusId;
             existing.Priority = task.Priority;
             existing.DueDate = task.DueDate;
             existing.UpdatedAt = DateTime.UtcNow;
