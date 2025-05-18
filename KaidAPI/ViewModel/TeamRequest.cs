@@ -10,9 +10,9 @@ namespace KaidAPI.ViewModel
         
         public string? Description { get; set; }
         
-        public Guid? LeaderID { get; set; }
+        public Guid? LeaderId { get; set; }
         
         [Required]
-        public Guid ProjectID { get; set; }
+        public Guid ProjectId { get; set; }
     }
 } 

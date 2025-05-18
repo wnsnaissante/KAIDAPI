@@ -1,8 +1,10 @@
+using KaidAPI.Models;
+using KaidAPI.ViewModel;
+
 public interface ITeamService {
     Task<Guid> CreateTeamAsync(TeamRequest request);
-    Task<List<Team>> GetTeamsByUserOidcAsync(string oidcSub);
-    Task<OperationResult> UpdateTeamAsync(Guid teamId, TeamRequest request);
-    Task<OperationResult> DeleteTeamAsync(Guid teamId);
+    Task<OperationResult> UpdateTeamAsync(Guid requesterId, Guid teamId, TeamRequest request);
+    Task<OperationResult> DeleteTeamAsync(Guid requesterId, Guid teamId);
 }
 
 

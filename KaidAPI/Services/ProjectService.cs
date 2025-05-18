@@ -78,7 +78,7 @@ public class ProjectService : IProjectService
             }
 
             var existingProject = await _projectRepository.GetProjectByIdAsync(projectRequest.ProjectId.Value);
-            if (existingProject == null)
+            if (existingProject is null)
             {
                 return new OperationResult { Success = false, Message = "Project not found" };
             }

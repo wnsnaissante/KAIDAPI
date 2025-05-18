@@ -1,3 +1,8 @@
+using KaidAPI.Context;
+using KaidAPI.Models;
+using KaidAPI.Repositories;
+using Microsoft.EntityFrameworkCore;
+
 public class TeamRepository : ITeamRepository
 {
     private readonly ServerDbContext _context;
@@ -11,7 +16,12 @@ public class TeamRepository : ITeamRepository
     {
         _context.Teams.Add(team);
         await _context.SaveChangesAsync();
-        return new OperationResult(true, "Team created successfully");
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Team created successfully",
+            Data = team
+        };
     }
 
     public async Task<Team> GetTeamByTeamIdAsync(Guid teamId)
@@ -24,46 +34,37 @@ public class TeamRepository : ITeamRepository
         return await _context.Teams.Where(t => t.ProjectId == projectId).ToListAsync();
     }
 
-    public async Task<List<Team>> GetTeamByLeaderUserOidcAsync(string oidcSub)
-    {
-        return await _context.Teams.Where(t => t.LeaderId == oidcSub).ToListAsync();
-    }
-
-    public async Task<List<Team>> GetTeamByUserOidcAsync(string oidcSub)
-    {
-        var user = await GetUserByOidcAsync(oidcSub);
-        if (user == null)
-        {
-            return new List<Team>();
-        }
-
-        // Find all teams that the user is a member of through odicsub
-    }
-
     public async Task<OperationResult> DeleteTeamAsync(Guid teamId)
     {
         var team = await _context.Teams.FindAsync(teamId);
         if (team == null)
         {
-            return new OperationResult(false, "Team not found");
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Team not found"
+            };
         }
+
         _context.Teams.Remove(team);
         await _context.SaveChangesAsync();
-        return new OperationResult(true, "Team deleted successfully");
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Team deleted successfully"
+        };
     }
 
-    public async Task<OperationResult> UpdateTeamAsync(Guid teamId, Team team)  
+    public async Task<OperationResult> UpdateTeamAsync(Team team)
     {
-        var existingTeam = await _context.Teams.FindAsync(teamId);
-        if (existingTeam == null)
-        {
-            return new OperationResult(false, "Team not found");    
-        }
-        existingTeam.TeamName = team.TeamName;
-        existingTeam.Description = team.Description;
-        existingTeam.LeaderId = team.LeaderId;
-        existingTeam.ProjectId = team.ProjectId;
+        _context.Teams.Update(team);
         await _context.SaveChangesAsync();
-        return new OperationResult(true, "Team updated successfully");
-        }
+
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Team updated successfully",
+            Data = team
+        };
+    }
 }
