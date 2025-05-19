@@ -54,4 +54,28 @@ public class ProjectTaskController : ControllerBase
         await _taskRepository.DeleteProjectTaskAsync(taskId);
         return NoContent();
     }
+
+    [HttpGet("team/{teamName}")]
+    public async Task<IActionResult> GetTasksByTeam(string teamName)
+    {
+        var tasks = await _taskRepository.GetProjectTasksByTeamAsync(teamName);
+
+        var result = new
+        {
+            Team = teamName,
+            Tasks = tasks.Select(t => new
+            {
+                TrackCode = t.TaskId,
+                Summary = t.TaskName,
+                Status = t.StatusId,
+                Assignee = t.Assignee.ToString(),
+                Deadline = t.DueDate.ToString("yyyy-MM-dd"),
+                CreatedDate = t.CreatedAt.ToString("yyyy-MM-dd"),
+                Priority = t.Priority,
+                Reporter = t.Team?.Leader?.Username ?? "N/A"
+            })
+        };
+
+        return Ok(result);
+    }
 }

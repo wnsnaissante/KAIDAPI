@@ -59,4 +59,13 @@ public class ProjectTaskRepository : IProjectTaskRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<IEnumerable<ProjectTask>> GetProjectTasksByTeamAsync(string teamName)
+    {
+        return await _context.ProjectTasks
+            .Include(t => t.Team)
+                .ThenInclude(team => team.Leader)
+            .Where(t => t.Team != null && t.Team.TeamName == teamName)
+            .ToListAsync();
+    }
 }

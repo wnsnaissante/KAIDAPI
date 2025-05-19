@@ -1,5 +1,6 @@
 ﻿namespace KaidAPI.Models;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class ProjectTask
 {
@@ -13,4 +14,12 @@ public class ProjectTask
     public DateTime DueDate { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+
+    public Guid ProjectId { get; set; }
+    [ForeignKey("ProjectId")]
+    public Project Project { get; set; }
+
+    public Guid TeamId { get; set; }
+    [ForeignKey("TeamId")]
+    public Team Team { get; set; }
 }
