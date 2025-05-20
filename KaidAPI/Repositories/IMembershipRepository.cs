@@ -4,4 +4,5 @@ namespace KaidAPI.Repositories;
 
 public interface IMembershipRepository {
     Task<OperationResult> CreateMembershipAsync(Membership membership);
+    Task<List<Membership>> GetMembershipsByUserIdAsync(Guid userId);
 }

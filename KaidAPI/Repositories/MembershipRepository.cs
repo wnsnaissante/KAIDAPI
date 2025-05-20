@@ -1,6 +1,7 @@
 using KaidAPI.Context;
 using KaidAPI.Models;
 using KaidAPI.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 public class MembershipRepository : IMembershipRepository
 {
@@ -20,4 +21,15 @@ public class MembershipRepository : IMembershipRepository
         };
     }
 
+    public async Task<List<Membership>> GetMembershipsByUserIdAsync(Guid userId)
+    {
+        var memberships = await _context.Memberships.Where(x => x.UserId == userId).ToListAsync();
+        return memberships;
+    }
+
+    public async Task<List<Membership>> GetMembershipsByProjectIdAsync(Guid projectId)
+    {
+        var memberships = await _context.Memberships.Where(x => x.ProjectId == projectId).ToListAsync();
+        return memberships;
+    }
 }
