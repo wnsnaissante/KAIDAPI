@@ -25,7 +25,6 @@ public class Membership
     [ForeignKey("TeamId")]
     public Team Team { get; set; }
     
-    [ForeignKey("Status")]
     [MaxLength(20)]
     public string Status { get; set; }
 }
