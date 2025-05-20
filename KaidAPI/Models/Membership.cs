@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using KaidAPI.Models;
 
-public class ProjectMembership
+public class Membership
 {
     [Key]
     public Guid ProjectMembershipId { get; set; }
@@ -24,5 +24,9 @@ public class ProjectMembership
     
     [ForeignKey("TeamId")]
     public Team Team { get; set; }
+    
+    [ForeignKey("Status")]
+    [MaxLength(20)]
+    public string Status { get; set; }
 }
 

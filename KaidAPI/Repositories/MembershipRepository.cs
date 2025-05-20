@@ -2,16 +2,16 @@ using KaidAPI.Context;
 using KaidAPI.Models;
 using KaidAPI.Repositories;
 
-public class TeamMembershipRepository : ITeamMembershipRepository
+public class MembershipRepository : IMembershipRepository
 {
     private readonly ServerDbContext _context;
 
-    public TeamMembershipRepository(ServerDbContext context) {
+    public MembershipRepository(ServerDbContext context) {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task<OperationResult> CreateTeamMembershipAsync(TeamMembership teamMembership) {
-        _context.TeamMemberships.Add(teamMembership);
+    public async Task<OperationResult> CreateMembershipAsync(Membership membership) {
+        _context.Memberships.Add(membership);
         await _context.SaveChangesAsync();
         return new OperationResult
         {
