@@ -38,7 +38,7 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateProject([FromBody] ProjectRequest projectRequest)
+    public async Task<IActionResult> UpdateProject([FromQuery] Guid projectId,[FromBody] ProjectRequest projectRequest)
     {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
         
@@ -47,7 +47,7 @@ public class ProjectController : ControllerBase
             return Unauthorized("User does not have an access token.");
         }
 
-        var result = await _projectService.UpdateProjectAsync(projectRequest, oidcSub);
+        var result = await _projectService.UpdateProjectAsync(projectRequest, oidcSub, projectId);
 
         if (result.Success)
         {
