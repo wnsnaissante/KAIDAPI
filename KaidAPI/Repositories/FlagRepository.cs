@@ -1,3 +1,6 @@
+using KaidAPI.Context;
+using KaidAPI.Models;
+
 namespace KaidAPI.Repositories;
 public class FlagRepository : IFlagRepository
 {

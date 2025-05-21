@@ -1,5 +1,5 @@
 ﻿namespace KaidAPI.Repositories;
-
+using KaidAPI.Models;
 public interface IFlagRepository
 {
     Task<Guid> CreateFlagAsync(Flag flag);
