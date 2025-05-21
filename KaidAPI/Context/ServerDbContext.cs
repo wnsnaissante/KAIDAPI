@@ -13,4 +13,5 @@ public class ServerDbContext: DbContext
     public DbSet<ProjectTask> ProjectTasks { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<Membership> Memberships { get; set; }
+    public DbSet<Flag> Flags { get; set; }
 }

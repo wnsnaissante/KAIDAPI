@@ -22,15 +22,10 @@ public class ProjectRepository: IProjectRepository
     
     public async Task<Project> GetProjectByIdAsync(Guid projectId)
     {
-        return await _context.Projects.FirstOrDefaultAsync(x => x.ProjectId == projectId);
+        return await _context.Projects.FindAsync(projectId);
     }
     
-    public async Task<List<Project>> GetAllProjectsAsync()
-    {
-        return await _context.Projects.ToListAsync();
-    }
-    
-    public async Task<OperationResult> UpdateProjectAsync(Project project)
+    public async Task UpdateProjectAsync(Project project)
     {
         var existing = await _context.Projects.FindAsync(project.ProjectId);
         if (existing != null)
@@ -41,20 +36,16 @@ public class ProjectRepository: IProjectRepository
 
             _context.Projects.Update(existing);
             await _context.SaveChangesAsync();
-            return new OperationResult { Success = true, Message = "Project updated successfully" };
         }
-        return new OperationResult { Success = false, Message = "Project not found" };
     }
     
-    public async Task<OperationResult> DeleteProjectAsync(Guid projectId)
+    public async Task DeleteProjectAsync(Guid projectId)
     {
         var project = await _context.Projects.FindAsync(projectId);
         if (project != null)
         {
             _context.Projects.Remove(project);
             await _context.SaveChangesAsync();
-            return new OperationResult { Success = true, Message = "Project deleted successfully" };
         }
-        return new OperationResult { Success = false, Message = "Project not found" };
     }
 }

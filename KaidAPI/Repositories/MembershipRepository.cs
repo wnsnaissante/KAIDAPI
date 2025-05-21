@@ -27,9 +27,9 @@ public class MembershipRepository : IMembershipRepository
         return memberships;
     }
 
-    public async Task<List<Membership>> GetMembershipsByProjectIdAsync(Guid projectId)
+    public async Task<Membership> GetMembershipByProjectIdAndUserIdAsync(Guid projectId, Guid userId)
     {
-        var memberships = await _context.Memberships.Where(x => x.ProjectId == projectId).ToListAsync();
-        return memberships;
+        var membership = await _context.Memberships.Where(x => x.ProjectId == projectId && x.UserId == userId).FirstOrDefaultAsync();
+        return membership;
     }
 }
