@@ -1,0 +1,10 @@
+namespace KaidAPI.Services;
+
+public interface IFlagService
+{
+    Task<Guid> CreateFlagAsync(FlagRequest flagRequest);
+    Task<FlagResponse> GetFlagByIdAsync(string oidcSub, Guid flagId);
+
+    Task<OperationResult> UpdateFlagAsync(string oidcSub, Guid flagId, FlagRequest flagRequest);
+    Task<OperationResult> DeleteFlagAsync(string oidcSub, Guid flagId);
+}
