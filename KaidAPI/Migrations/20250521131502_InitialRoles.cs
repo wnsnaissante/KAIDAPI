@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace KaidAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class RefactorMembership : Migration
+    public partial class InitialRoles : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,7 @@ namespace KaidAPI.Migrations
                 name: "TeamMemberships");
 
             migrationBuilder.CreateTable(
-                name: "Role",
+                name: "Roles",
                 columns: table => new
                 {
                     RoleId = table.Column<int>(type: "int", nullable: false)
@@ -28,7 +28,7 @@ namespace KaidAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Role", x => x.RoleId);
+                    table.PrimaryKey("PK_Roles", x => x.RoleId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -55,9 +55,9 @@ namespace KaidAPI.Migrations
                         principalColumn: "ProjectId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Memberships_Role_RoleId",
+                        name: "FK_Memberships_Roles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "Role",
+                        principalTable: "Roles",
                         principalColumn: "RoleId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -91,7 +91,7 @@ namespace KaidAPI.Migrations
                 name: "Memberships");
 
             migrationBuilder.DropTable(
-                name: "Role");
+                name: "Roles");
 
             migrationBuilder.CreateTable(
                 name: "TeamMemberships",

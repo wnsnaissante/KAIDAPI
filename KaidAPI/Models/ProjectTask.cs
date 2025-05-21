@@ -1,6 +1,7 @@
 ﻿namespace KaidAPI.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 public class ProjectTask
 {
@@ -16,10 +17,14 @@ public class ProjectTask
     public DateTime UpdatedAt { get; set; }
 
     public Guid ProjectId { get; set; }
+
     [ForeignKey("ProjectId")]
-    public Project Project { get; set; }
+    [JsonIgnore]
+    public Project? Project { get; set; }
 
     public Guid TeamId { get; set; }
+
     [ForeignKey("TeamId")]
-    public Team Team { get; set; }
+    [JsonIgnore]
+    public Team? Team { get; set; }
 }

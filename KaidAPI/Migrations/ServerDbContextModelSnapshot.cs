@@ -117,7 +117,7 @@ namespace KaidAPI.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("Role");
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("KaidAPI.Models.Team", b =>

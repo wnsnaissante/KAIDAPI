@@ -14,4 +14,5 @@ public class ServerDbContext: DbContext
     public DbSet<Team> Teams { get; set; }
     public DbSet<Membership> Memberships { get; set; }
     public DbSet<Flag> Flags { get; set; }
+    public DbSet<Role> Roles { get; set; }
 }
