@@ -32,4 +32,28 @@ public class MembershipRepository : IMembershipRepository
         var membership = await _context.Memberships.Where(x => x.ProjectId == projectId && x.UserId == userId).FirstOrDefaultAsync();
         return membership;
     }
+
+    public async Task<Membership> GetMembershipByMembershipIdAsync(Guid membershipId) {
+        var membership = await _context.Memberships.FindAsync(membershipId);
+        return membership;
+    }
+
+    public async Task<OperationResult> DeleteMembershipAsync(Guid membershipId) {
+        var membership = await _context.Memberships.FindAsync(membershipId);
+        if (membership == null) {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Membership not found"
+            };
+        }
+
+        _context.Memberships.Remove(membership);
+        await _context.SaveChangesAsync();
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Membership deleted successfully"
+        };
+    }
 }

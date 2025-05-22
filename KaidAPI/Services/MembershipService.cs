@@ -1,0 +1,107 @@
+using KaidAPI.Models;
+using KaidAPI.Repositories;
+
+namespace KaidAPI.Services;
+
+public class MembershipService : IMembershipService
+{
+    private readonly IMembershipRepository _membershipRepository;
+    private readonly IUserRepository _userRepository;
+    
+    public MembershipService(IMembershipRepository membershipRepository, IUserRepository userRepository)
+    {
+        _membershipRepository = membershipRepository;
+        _userRepository =  userRepository;
+    }
+
+    public async Task<OperationResult> CreateMembershipAsync(string oidcSub, MemberRequest memberRequest)
+    {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null) {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        var newMember = new Membership
+        {
+            ProjectMembershipId = Guid.NewGuid(),
+            ProjectId = memberRequest.ProjectId,
+            UserId = memberRequest.UserId,
+            JoinedAt = DateTime.UtcNow,
+            RoleId = memberRequest.RoleId,
+            SuperiorId = memberRequest.SuperiorId,
+        };
+        
+        await _membershipRepository.CreateMembershipAsync(newMember);
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Membership created successfully"
+        };
+    }
+
+    public async Task<OperationResult> DeleteMembershipAsync(string oidcSub, Guid membershipId) {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null) {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        var membership = await _membershipRepository.GetMembershipByMembershipIdAsync(membershipId);
+        if (membership == null) {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Membership not found"
+            };
+        }
+
+        if (membership.UserId != user.UserId || membership.RoleId != 1) {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "You are not authorized to delete this membership"
+            };
+        }
+
+        return await _membershipRepository.DeleteMembershipAsync(membershipId); 
+    }
+
+    public async Task<OperationResult> GetUserRoleByProjectIdAndUserIdAsync(string oidcSub, Guid projectId) {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null) {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        var membership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+        if (membership == null) {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Membership not found"
+            };
+        }
+
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Membership found",
+            Data = membership.Role
+        };
+    }
+
+    // public async Task<OperationResult> UpdateMembershipAsync(Guid membershipId, MemberRequest membership)
+    // {
+    //     
+    // }
+}
