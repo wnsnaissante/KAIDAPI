@@ -1,10 +1,11 @@
 ﻿using KaidAPI.Context;
 using KaidAPI.Models;
+using KaidAPI.ViewModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace KaidAPI.Repositories;
 
-public class CommentRepository
+public class CommentRepository : ICommentRepository
 {
     private readonly ServerDbContext _context;
 
@@ -45,7 +46,7 @@ public class CommentRepository
         };
     }
 
-    public async Task<Comment> GetCommentByCommentIdAsync(Guid commentId)
+    public async Task<Comment> GetCommentById(Guid commentId)
     {
         return await _context.Comments.FindAsync(commentId);
     }
@@ -55,10 +56,27 @@ public class CommentRepository
         return await _context.Comments.Where(c => c.TaskId == taskId).ToListAsync();
     }
 
-    public async Task<OperationResult> UpdateCommentAsync(Comment comment)
+    public async Task<OperationResult> UpdateCommentAsync(Guid commentId, Comment comment)
     {
-        _context.Comments.Update(comment);
+        var existingComment = await _context.Comments.FindAsync(commentId);
+        if (existingComment == null)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Comment not found"
+            };
+        }
+
+        existingComment.CommentText = comment.CommentText;
+        existingComment.CommentDate = comment.CommentDate;
+        _context.Comments.Update(existingComment);
         await _context.SaveChangesAsync();
-        return new OperationResult { Success = true, Message = "Comment updated" };
+        
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Comment updated"
+        };
     }
 }
