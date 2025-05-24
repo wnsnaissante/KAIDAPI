@@ -15,4 +15,5 @@ public class ServerDbContext: DbContext
     public DbSet<Membership> Memberships { get; set; }
     public DbSet<Flag> Flags { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<Comment> Comments { get; set; }
 }
