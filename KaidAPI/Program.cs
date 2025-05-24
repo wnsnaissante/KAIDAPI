@@ -32,6 +32,9 @@ public class Program
         builder.Services.AddScoped<IFlagService, FlagService>();
         builder.Services.AddScoped<IFlagRepository, FlagRepository>();
         builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+        builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+        builder.Services.AddScoped<ITeamService, TeamService>();
+        builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
 
         builder.Services.AddAuthentication(options =>
             {
