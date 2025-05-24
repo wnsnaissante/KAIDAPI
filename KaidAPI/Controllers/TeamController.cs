@@ -16,7 +16,8 @@ public class TeamController : ControllerBase
     {
         _teamService = teamService ?? throw new ArgumentNullException(nameof(teamService));
     }
-    
+
+    [HttpPost("create")]
     public async Task<IActionResult> CreateTeam([FromBody] TeamRequest request) {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
         

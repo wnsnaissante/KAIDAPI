@@ -1,34 +1,44 @@
 using KaidAPI.Models;
-using KaidAPI.Repositories;
+using System.Security.Claims;
+using KaidAPI.ViewModel;
+using KaidAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KaidAPI.Controllers;
 
 [Authorize]
-//[AllowAnonymous]
 [Route("api/[controller]")]
 [ApiController]
 public class ProjectTaskController : ControllerBase
 {
-    private readonly IProjectTaskRepository _taskRepository;
+    private readonly IProjectTaskService _taskService;
 
-    public ProjectTaskController(IProjectTaskRepository taskRepository)
+    public ProjectTaskController(IProjectTaskService taskService)
     {
-        _taskRepository = taskRepository;
+        _taskService = taskService;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateTask([FromBody] ProjectTask task)
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateTask([FromBody] ProjectTaskRequest request)
     {
-        var id = await _taskRepository.CreateProjectTaskAsync(task);
-        return Ok(new { TaskId = id });
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+        var result = await _taskService.CreateProjectTaskAsync(request);
+        if (result == null)
+            return BadRequest("Error");
+
+        return Ok(new { TaskId = result });
     }
 
     [HttpGet("{taskId}")]
     public async Task<IActionResult> GetTaskById(string taskId)
     {
-        var task = await _taskRepository.GetProjectTaskByIdAsync(taskId);
+        var task = await _taskService.GetProjectTaskByIdAsync(taskId);
         if (task == null) return NotFound();
         return Ok(task);
     }
@@ -36,46 +46,40 @@ public class ProjectTaskController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllTasks()
     {
-        var tasks = await _taskRepository.GetAllProjectTasksAsync();
+        var tasks = await _taskService.GetAllProjectTasksAsync();
         return Ok(tasks);
     }
 
     [HttpPut("{taskId}")]
     public async Task<IActionResult> UpdateTask(string taskId, [FromBody] ProjectTask updatedTask)
     {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
         updatedTask.TaskId = taskId;
-        await _taskRepository.UpdateProjectTaskAsync(updatedTask);
+        var result = await _taskService.UpdateProjectTaskAsync(updatedTask, oidcSub);
+        if (!result.Success)
+            return BadRequest(result.Message);
+
         return NoContent();
     }
 
     [HttpDelete("{taskId}")]
     public async Task<IActionResult> DeleteTask(string taskId)
     {
-        await _taskRepository.DeleteProjectTaskAsync(taskId);
-        return NoContent();
-    }
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 
-    [HttpGet("team/{teamName}")]
-    public async Task<IActionResult> GetTasksByTeam(string teamName)
-    {
-        var tasks = await _taskRepository.GetProjectTasksByTeamAsync(teamName);
-
-        var result = new
+        if (string.IsNullOrEmpty(oidcSub))
         {
-            Team = teamName,
-            Tasks = tasks.Select(t => new
-            {
-                TrackCode = t.TaskId,
-                Summary = t.TaskName,
-                Status = t.StatusId,
-                Assignee = t.Assignee.ToString(),
-                Deadline = t.DueDate.ToString("yyyy-MM-dd"),
-                CreatedDate = t.CreatedAt.ToString("yyyy-MM-dd"),
-                Priority = t.Priority,
-                Reporter = t.Team?.Leader?.Username ?? "N/A"
-            })
-        };
+            return Unauthorized("User does not have an access token.");
+        }
+        var result = await _taskService.DeleteProjectTaskAsync(taskId, oidcSub);
+        if (!result.Success)
+            return BadRequest(result.Message);
 
-        return Ok(result);
+        return NoContent();
     }
 }

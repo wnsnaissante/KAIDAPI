@@ -1,5 +1,6 @@
 using KaidAPI.Context;
 using KaidAPI.Models;
+using KaidAPI.ViewModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace KaidAPI.Repositories;
@@ -13,10 +14,24 @@ public class ProjectTaskRepository : IProjectTaskRepository
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task<string> CreateProjectTaskAsync(ProjectTask task)
+    public async Task<string> CreateProjectTaskAsync(ProjectTaskRequest request)
     {
+        var task = new ProjectTask
+        {
+            TaskName = request.TaskName,
+            TaskDescription = request.TaskDescription,
+            Assignee = request.Assignee ?? Guid.Empty,
+            DueDate = request. DueDate,
+            ProjectId = request.ProjectId,
+            TeamId = request.TeamId
+        };
+
+        task.TaskId = Guid.NewGuid().ToString();
         task.CreatedAt = DateTime.UtcNow;
         task.UpdatedAt = DateTime.UtcNow;
+        task.StatusId = "Todo";
+        task.Priority = 1;
+
         _context.ProjectTasks.Add(task);
         await _context.SaveChangesAsync();
         return task.TaskId;
