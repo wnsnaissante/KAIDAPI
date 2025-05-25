@@ -100,6 +100,17 @@ public class MembershipService : IMembershipService
         };
     }
 
+    public async Task<IEnumerable<Membership>> GetMembersAsync(Guid projectId, Guid teamId)
+    {
+        var allMemberships = await _membershipRepository.GetAllMembershipsAsync();
+
+        var matchedMemberships = allMemberships
+            .Where(m => m.ProjectId == projectId && m.TeamId == teamId)
+            .ToList();
+
+        return matchedMemberships;
+    }
+
     // public async Task<OperationResult> UpdateMembershipAsync(Guid membershipId, MemberRequest membership)
     // {
     //     

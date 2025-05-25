@@ -30,6 +30,7 @@ public class TeamController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("delete")]
     public async Task<IActionResult> DeleteTeam([FromQuery] Guid teamId) {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
         
@@ -42,6 +43,7 @@ public class TeamController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("update")]
     public async Task<IActionResult> UpdateTeam([FromQuery] Guid teamId, [FromBody] TeamRequest request) {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
         
@@ -54,6 +56,7 @@ public class TeamController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("get")]
     public async Task<IActionResult> GetTeams([FromQuery] Guid projectId)
     {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
