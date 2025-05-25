@@ -13,6 +13,17 @@ service:
   port: 80
   targetPort: 8080
 
+ingress:
+  enabled: true
+  host: kaid.ceptrix.cloud
+  annotations:
+    kubernetes.io/ingress.class: haproxy
+    haproxy.org/ssl-redirect: "true"
+    haproxy.org/ssl-passthrough: "true"
+    haproxy.org/rewrite-target: /api/$2
+  tls:
+    secretName: ceptrix-cloud-tls
+
 resources:
   limits:
     cpu: 500m
