@@ -56,4 +56,9 @@ public class MembershipRepository : IMembershipRepository
             Message = "Membership deleted successfully"
         };
     }
+
+    public async Task<IEnumerable<Membership>> GetAllMembershipsAsync()
+    {
+        return await _context.Memberships.ToListAsync();
+    }
 }

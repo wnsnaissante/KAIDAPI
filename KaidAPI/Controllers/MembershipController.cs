@@ -53,17 +53,18 @@ public class MembershipController : ControllerBase
         return BadRequest(result.Message);
     }
 
-    // [HttpGet("get")]
-    // public async Task<IActionResult> GetMembershipsAsync([FromQuery] Guid projectId)
-    // {
-    //     var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-    //     if (string.IsNullOrEmpty(oidcSub))
-    //     {
-    //         return Unauthorized("User does not have an access token.");
-    //     }
-    //     
-    //     
-    // }
+    [HttpGet("get")]
+    public async Task<IActionResult> GetMembersAsync([FromQuery] Guid projectId, [FromQuery] Guid teamId)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _membershipService.GetMembersAsync(projectId, teamId);
+        return Ok(result);
+    }
     //
     // [HttpPut("update")]
     // public async Task<IActionResult> UpdateMembershipAsync(MemberRequest membershipRequest)
@@ -77,5 +78,5 @@ public class MembershipController : ControllerBase
     //     var result = await _membershipService.;
     // }
 
-    
+
 }

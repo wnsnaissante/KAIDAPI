@@ -14,6 +14,8 @@ public class Membership
     public Guid? SuperiorId { get; set; }
     [Required]
     public int RoleId { get; set; }
+    [Required]
+    public int isActivated { get; set; }
 
     public Guid? TeamId { get; set; }
     public DateTime JoinedAt { get; set; }
