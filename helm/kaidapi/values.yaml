@@ -19,10 +19,11 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: haproxy
     haproxy.org/ssl-redirect: "true"
-    haproxy.org/ssl-passthrough: "true"
+    haproxy.org/ssl-passthrough: "false"
     haproxy.org/rewrite-target: /$2
+    haproxy.org/ssl-verify: "false"
   tls:
-    secretName: ceptrix-cloud-tls
+    secretName: default/ceptrix-cloud-tls
 
 resources:
   limits:
