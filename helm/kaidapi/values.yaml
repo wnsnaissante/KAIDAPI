@@ -18,6 +18,7 @@ ingress:
   host: kaid.ceptrix.cloud
   annotations:
     kubernetes.io/ingress.class: haproxy
+    haproxy.org/rewrite-target: /$2
     haproxy.org/ssl-redirect: "true"
     haproxy.org/ssl-passthrough: "false"
     haproxy.org/ssl-verify: "false"
