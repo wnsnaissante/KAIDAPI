@@ -22,7 +22,7 @@ ingress:
     haproxy.org/ssl-redirect: "true"
     haproxy.org/ssl-passthrough: "false"
     haproxy.org/ssl-verify: "false"
-    haproxy.org/ssl-certificate: "default/ceptrix-cloud-tls"
+    haproxy.org/ssl-certificate: "kaidapi/ceptrix-cloud-tls"
     haproxy.org/ssl-redirect-code: "301"
   tls:
     secretName: ceptrix-cloud-tls
