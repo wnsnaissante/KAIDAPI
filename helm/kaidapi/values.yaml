@@ -24,6 +24,7 @@ ingress:
     haproxy.org/ssl-verify: "false"
     haproxy.org/ssl-certificate: "default/ceptrix-cloud-tls"
     haproxy.org/ssl-redirect-code: "301"
+    haproxy.org/path-rewrite: "/api/v1/(.*) /$1"
   tls:
     secretName: ceptrix-cloud-tls
 
