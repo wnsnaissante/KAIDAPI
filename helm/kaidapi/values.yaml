@@ -36,6 +36,10 @@ resources:
 env:
   - name: ASPNETCORE_ENVIRONMENT
     value: "Production"
+  - name: OpenIDConnectSettings__Authority
+    value: "https://auth.ceptrix.cloud/application/o/ceptrix/"
+  - name: OpenIDConnectSettings__ClientId
+    value: "4M7U589KsfghGy3yrjIFFHIFaWaUa3kMsAcCPNUk"
 
 secrets:
   enabled: true
