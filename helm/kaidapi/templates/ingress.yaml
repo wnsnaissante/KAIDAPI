@@ -8,7 +8,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: haproxy
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
   tls:
     - hosts:
         - {{ .Values.ingress.host }}
@@ -17,11 +17,11 @@ spec:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
-          - path: /api(/|$)(.*)
+          - path: /
             pathType: Prefix
             backend:
               service:
                 name: {{ .Release.Name }}
                 port:
                   number: {{ .Values.service.port }}
-{{- end }} 
+{{- end }}
