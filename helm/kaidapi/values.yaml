@@ -20,9 +20,10 @@ ingress:
     kubernetes.io/ingress.class: haproxy
     haproxy.org/ssl-redirect: "true"
     haproxy.org/ssl-passthrough: "false"
-    haproxy.org/rewrite-target: /$2
+    haproxy.org/rewrite-target: /api/v1/$2
     haproxy.org/ssl-verify: "false"
     haproxy.org/ssl-certificate: "default/ceptrix-cloud-tls"
+    haproxy.org/ssl-redirect-code: "301"
   tls:
     secretName: ceptrix-cloud-tls
 
