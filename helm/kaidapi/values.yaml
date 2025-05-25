@@ -22,8 +22,9 @@ ingress:
     haproxy.org/ssl-passthrough: "false"
     haproxy.org/rewrite-target: /$2
     haproxy.org/ssl-verify: "false"
+    haproxy.org/ssl-certificate: "default/ceptrix-cloud-tls"
   tls:
-    secretName: default/ceptrix-cloud-tls
+    secretName: ceptrix-cloud-tls
 
 resources:
   limits:
