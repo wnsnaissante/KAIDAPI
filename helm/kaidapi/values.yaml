@@ -19,10 +19,8 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: haproxy
     haproxy.org/ssl-redirect: "true"
-    haproxy.org/ssl-passthrough: "true"
-    haproxy.org/rewrite-target: /$2
-    haproxy.org/backend-config-snippet: |
-      server SRV_1 127.0.0.1:8080 check
+    haproxy.org/ssl-passthrough: "false"
+    haproxy.org/ssl-verify-hostname: "false"
   tls:
     secretName: ceptrix-cloud-tls
 
