@@ -1,0 +1,6 @@
+apiVersion: v2
+name: kaidapi
+description: A Helm chart for KaidAPI
+type: application
+version: 0.1.0
+appVersion: "1.0.0" 
