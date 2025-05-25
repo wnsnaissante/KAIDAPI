@@ -24,11 +24,10 @@ ingress:
     haproxy.org/ssl-verify-hostname: "false"
     haproxy.org/ssl-verify-client: "false"
     haproxy.org/ssl-options: "no-sslv3 no-tlsv10 no-tlsv11"
-    haproxy.org/rewrite-target: /$2
   tls:
     secretName: ceptrix-cloud-tls
   paths:
-    - path: /api/v1(/|$)(.*)
+    - path: /api/v1
       pathType: Prefix
       backend:
         service:
