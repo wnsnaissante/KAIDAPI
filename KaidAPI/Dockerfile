@@ -7,7 +7,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["KaidAPI/KaidAPI.csproj", "KaidAPI/"]
+COPY ["KaidAPI.csproj", "KaidAPI/"]
 RUN dotnet restore "KaidAPI/KaidAPI.csproj"
 COPY . .
 WORKDIR "/src/KaidAPI"
