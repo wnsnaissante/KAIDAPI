@@ -21,8 +21,18 @@ ingress:
     haproxy.org/ssl-redirect: "true"
     haproxy.org/ssl-passthrough: "false"
     haproxy.org/ssl-verify-hostname: "false"
+    haproxy.org/ssl-verify-client: "false"
+    haproxy.org/ssl-options: "no-sslv3 no-tlsv10 no-tlsv11"
   tls:
     secretName: ceptrix-cloud-tls
+  paths:
+    - path: /api
+      pathType: Prefix
+      backend:
+        service:
+          name: kaidapi
+          port:
+            number: 80
 
 resources:
   limits:
