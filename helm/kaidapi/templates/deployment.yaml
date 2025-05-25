@@ -28,8 +28,10 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             {{- toYaml .Values.env | nindent 12 }}
-          {{- if .Values.secrets.enabled }}
-          envFrom:
-            - secretRef:
-                name: {{ .Release.Name }}-secrets
-          {{- end }} 
+            {{- if .Values.secrets.enabled }}
+            - name: ConnectionStrings__MySql
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secrets
+                  key: ConnectionStrings__MySql
+            {{- end }} 
