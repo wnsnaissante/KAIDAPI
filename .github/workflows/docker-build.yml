@@ -66,26 +66,4 @@ jobs:
           files: kaidapi-*.tgz
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: Set up kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-          kubectl config view
-
-      - name: Deploy to Kubernetes
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: |
-          helm upgrade --install kaidapi ./helm/kaidapi \
-            --set secrets.database.connectionString="${{ secrets.MYSQL_CONNECTION_STRING }}" \
-            --set secrets.openIdConnect.authority="${{ secrets.OPENID_AUTHORITY }}" \
-            --set secrets.openIdConnect.clientSecret="${{ secrets.OPENID_CLIENT_SECRET }}" \
-            --set secrets.openIdConnect.clientId="${{ secrets.OPENID_CLIENT_ID }}" \
-            --set secrets.openIdConnect.issuer="${{ secrets.OPENID_ISSUER }}" 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
