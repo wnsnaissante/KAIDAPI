@@ -16,4 +16,10 @@ public class Flag
     
     [ForeignKey("ProjectId")]
     public Project Project { get; set; }
+
+    [ForeignKey("TeamId")]
+    public Team Team { get; set; }
+
+    [ForeignKey("OwnerId")]
+    public User Owner { get; set; }
 }
