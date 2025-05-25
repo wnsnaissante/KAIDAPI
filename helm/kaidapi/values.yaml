@@ -21,6 +21,8 @@ ingress:
     haproxy.org/ssl-redirect: "true"
     haproxy.org/ssl-passthrough: "true"
     haproxy.org/rewrite-target: /$2
+    haproxy.org/backend-config-snippet: |
+      server SRV_1 127.0.0.1:8080 check
   tls:
     secretName: ceptrix-cloud-tls
 
