@@ -153,6 +153,12 @@ public class Program
         app.UseHttpsRedirection();
         app.UseRouting();
 
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ServerDbContext>();
+            db.Database.Migrate();
+        }
+
         app.UseAuthentication(); 
         app.UseAuthorization(); 
         
