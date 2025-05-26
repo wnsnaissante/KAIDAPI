@@ -7,7 +7,7 @@ public interface IProjectService
 {
     Task<OperationResult> CreateNewProjectAsync(ProjectRequest projectRequest, string oidcSub);
     Task<OperationResult> DeleteProjectAsync(Guid projectId, string oidcSub);
-    Task<OperationResult> UpdateProjectAsync(ProjectRequest projectRequest, string oidcSub);
-    Task<OperationResult> GetProjectByIdAsync(Guid projectId, string oidcSub);
-    Task<OperationResult> GetAllProjectsAsync(string oidcSub);
+    Task<OperationResult> UpdateProjectAsync(ProjectRequest projectRequest, string oidcSub, Guid projectId);
+    Task<OperationResult> GetProjectByProjectIdAsync(string oidcSub, Guid projectId);
+    Task<OperationResult> GetProjectsByUserIdAsync(string oidcSub);
 }

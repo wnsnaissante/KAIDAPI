@@ -8,12 +8,14 @@ public class ProjectService : IProjectService
 {
     private readonly IUserRepository _userRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IMembershipRepository _membershipRepository;
     private readonly ILogger<ProjectService> _logger;
 
-    public ProjectService(IUserRepository userRepository,IProjectRepository projectRepository, ILogger<ProjectService> logger)
+    public ProjectService(IUserRepository userRepository,IProjectRepository projectRepository,IMembershipRepository membershipRepository, ILogger<ProjectService> logger)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
+        _membershipRepository = membershipRepository ?? throw new ArgumentNullException(nameof(membershipRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -43,6 +45,18 @@ public class ProjectService : IProjectService
 
             var projectId = await _projectRepository.CreateProjectAsync(newProject);
 
+            var membership = new Membership
+            {
+                UserId = user.UserId,
+                ProjectId = projectId,
+                ProjectMembershipId = Guid.NewGuid(),
+                RoleId = 1,
+                JoinedAt = DateTime.UtcNow,
+                Status = "Active"
+            };
+            
+            await _membershipRepository.CreateMembershipAsync(membership);
+
             return new OperationResult
             {
                 Success = true,
@@ -61,7 +75,7 @@ public class ProjectService : IProjectService
         }
     }
 
-    public async Task<OperationResult> UpdateProjectAsync(ProjectRequest projectRequest, string oidcSub)
+    public async Task<OperationResult> UpdateProjectAsync(ProjectRequest projectRequest, string oidcSub, Guid projectId)
     {
         try
         {
@@ -72,13 +86,8 @@ public class ProjectService : IProjectService
                 return new OperationResult { Success = false, Message = "User not found" };
             }
 
-            if (projectRequest.ProjectId == null)
-            {
-                return new OperationResult { Success = false, Message = "Project ID is required" };
-            }
-
-            var existingProject = await _projectRepository.GetProjectByIdAsync(projectRequest.ProjectId.Value);
-            if (existingProject == null)
+            var existingProject = await _projectRepository.GetProjectByIdAsync(projectId);
+            if (existingProject is null)
             {
                 return new OperationResult { Success = false, Message = "Project not found" };
             }
@@ -90,7 +99,7 @@ public class ProjectService : IProjectService
 
             var project = new Project()
             {
-                ProjectId = projectRequest.ProjectId.Value,
+                ProjectId = projectId,
                 ProjectName = projectRequest.ProjectName,
                 ProjectDescription = projectRequest.ProjectDescription,
                 DueDate = projectRequest.DueDate,
@@ -135,7 +144,7 @@ public class ProjectService : IProjectService
         }
     }
 
-    public async Task<OperationResult> GetProjectByIdAsync(Guid projectId, string oidcSub)
+    public async Task<OperationResult> GetProjectByProjectIdAsync(string oidcSub, Guid projectId)
     {
         try
         {
@@ -162,7 +171,7 @@ public class ProjectService : IProjectService
         }
     }
 
-    public async Task<OperationResult> GetAllProjectsAsync(string oidcSub)
+    public async Task<OperationResult> GetProjectsByUserIdAsync(string oidcSub)
     {
         try
         {
@@ -171,15 +180,25 @@ public class ProjectService : IProjectService
             {
                 return new OperationResult { Success = false, Message = "User not found" };
             }
-            var projects = await _projectRepository.GetAllProjectsAsync();
-            if (projects.Count == 0)
+            var projects = new List<ProjectResponse>();
+            
+            var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            
+            foreach (var membership in memberships)
             {
-                return new OperationResult { Success = false, Message = "No projects found" };
+                var project = await _projectRepository.GetProjectByIdAsync(membership.ProjectId);
+                var projectResponse = new ProjectResponse
+                {
+                    ProjectId = project.ProjectId,
+                    ProjectName = project.ProjectName,
+                    ProjectDescription = project.ProjectDescription,
+                    DueDate = project.DueDate,
+                    OwnerId = user.UserId,
+                    CreatedAt = project.CreatedAt
+                };
+                projects.Add(projectResponse);
             }
-            if (projects.Any(p => p.OwnerId != user.UserId))
-            {
-                return new OperationResult { Success = false, Message = "No permission to get projects" };
-            }
+
             return new OperationResult { Success = true, Message = "Projects retrieved successfully", Data = projects };
         }
         catch (Exception exception)

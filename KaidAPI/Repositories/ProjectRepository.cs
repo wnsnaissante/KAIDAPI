@@ -25,12 +25,7 @@ public class ProjectRepository: IProjectRepository
         return await _context.Projects.FindAsync(projectId);
     }
     
-    public async Task<List<Project>> GetAllProjectsAsync()
-    {
-        return await _context.Projects.ToListAsync();
-    }
-    
-    public async System.Threading.Tasks.Task UpdateProjectAsync(Project project)
+    public async Task UpdateProjectAsync(Project project)
     {
         var existing = await _context.Projects.FindAsync(project.ProjectId);
         if (existing != null)
@@ -44,7 +39,7 @@ public class ProjectRepository: IProjectRepository
         }
     }
     
-    public async System.Threading.Tasks.Task DeleteProjectAsync(Guid projectId)
+    public async Task DeleteProjectAsync(Guid projectId)
     {
         var project = await _context.Projects.FindAsync(projectId);
         if (project != null)

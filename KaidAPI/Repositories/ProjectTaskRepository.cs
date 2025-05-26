@@ -1,5 +1,6 @@
 using KaidAPI.Context;
 using KaidAPI.Models;
+using KaidAPI.ViewModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace KaidAPI.Repositories;
@@ -13,13 +14,27 @@ public class ProjectTaskRepository : IProjectTaskRepository
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task<string> CreateProjectTaskAsync(ProjectTask task)
+    public async Task<string> CreateProjectTaskAsync(ProjectTaskRequest request)
     {
+        var task = new ProjectTask
+        {
+            TaskName = request.TaskName,
+            TaskDescription = request.TaskDescription,
+            Assignee = request.Assignee ?? Guid.Empty,
+            DueDate = request. DueDate,
+            ProjectId = request.ProjectId,
+            TeamId = request.TeamId
+        };
+
+        task.TaskId = Guid.NewGuid().ToString();
         task.CreatedAt = DateTime.UtcNow;
         task.UpdatedAt = DateTime.UtcNow;
+        task.StatusId = "Todo";
+        task.Priority = 1;
+
         _context.ProjectTasks.Add(task);
         await _context.SaveChangesAsync();
-        return task.TaskID;
+        return task.TaskId;
     }
 
     public async Task<ProjectTask> GetProjectTaskByIdAsync(string taskId)
@@ -34,13 +49,13 @@ public class ProjectTaskRepository : IProjectTaskRepository
 
     public async Task UpdateProjectTaskAsync(ProjectTask task)
     {
-        var existing = await _context.ProjectTasks.FindAsync(task.TaskID);
+        var existing = await _context.ProjectTasks.FindAsync(task.TaskId);
         if (existing != null)
         {
             existing.TaskName = task.TaskName;
             existing.TaskDescription = task.TaskDescription;
             existing.Assignee = task.Assignee;
-            existing.StatusID = task.StatusID;
+            existing.StatusId = task.StatusId;
             existing.Priority = task.Priority;
             existing.DueDate = task.DueDate;
             existing.UpdatedAt = DateTime.UtcNow;
@@ -58,5 +73,14 @@ public class ProjectTaskRepository : IProjectTaskRepository
             _context.ProjectTasks.Remove(task);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<IEnumerable<ProjectTask>> GetProjectTasksByTeamAsync(string teamName)
+    {
+        return await _context.ProjectTasks
+            .Include(t => t.Team)
+                .ThenInclude(team => team.Leader)
+            .Where(t => t.Team != null && t.Team.TeamName == teamName)
+            .ToListAsync();
     }
 }
