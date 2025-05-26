@@ -4,5 +4,5 @@ public class MemberRequest
     public Guid UserId { get; set; }
     public Guid? SuperiorId { get; set; }
     public int RoleId { get; set; }
-    public bool isActivated { get; set; }
+    public bool IsActivated { get; set; } = false;
 }

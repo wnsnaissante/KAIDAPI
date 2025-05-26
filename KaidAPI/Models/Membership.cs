@@ -15,7 +15,7 @@ public class Membership
     [Required]
     public int RoleId { get; set; }
     [Required]
-    public int isActivated { get; set; }
+    public bool IsActivated { get; set; } = false;
 
     public Guid? TeamId { get; set; }
     public DateTime JoinedAt { get; set; }
