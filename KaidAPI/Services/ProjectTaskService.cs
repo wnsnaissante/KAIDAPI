@@ -127,7 +127,7 @@ namespace KaidAPI.Services
                 if (user is null)
                     return new { Success = false, Message = "User not found" };
 
-                var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+                var memberships = await _membershipRepository.GetActivatedMembershipsByUserIdAsync(user.UserId);
                 var teamMembership = memberships.FirstOrDefault(m => m.Team?.TeamName == teamName);
 
                 if (teamMembership is null && !memberships.Any(m => m.RoleId == 1))

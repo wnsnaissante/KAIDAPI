@@ -10,4 +10,5 @@ public interface IProjectService
     Task<OperationResult> UpdateProjectAsync(ProjectRequest projectRequest, string oidcSub, Guid projectId);
     Task<OperationResult> GetProjectByProjectIdAsync(string oidcSub, Guid projectId);
     Task<OperationResult> GetProjectsByUserIdAsync(string oidcSub);
+    Task<OperationResult> GetInvitationsByUserIdAsync(string oidcSub);
 }

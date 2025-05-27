@@ -21,11 +21,18 @@ public class MembershipRepository : IMembershipRepository
         };
     }
 
-    public async Task<List<Membership>> GetMembershipsByUserIdAsync(Guid userId)
+    public async Task<List<Membership>> GetActivatedMembershipsByUserIdAsync(Guid userId)
     {
-        var memberships = await _context.Memberships.Where(x => x.UserId == userId).ToListAsync();
+        var memberships = await _context.Memberships.Where(x => x.UserId == userId && x.IsActivated == true).ToListAsync();
         return memberships;
     }
+
+    public async Task<List<Membership>> GetDeactivatedMembershipsByUserIdAsync(Guid userId)
+    {
+        var memberships = await _context.Memberships.Where(x => x.UserId == userId && x.IsActivated == false).ToListAsync();
+        return memberships;
+    }
+
 
     public async Task<Membership> GetMembershipByProjectIdAndUserIdAsync(Guid projectId, Guid userId)
     {

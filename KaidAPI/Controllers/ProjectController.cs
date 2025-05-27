@@ -77,6 +77,26 @@ public class ProjectController : ControllerBase
         return BadRequest(result);
     }
 
+    [HttpGet("get-invitations")]
+    public async Task<IActionResult> GetInvitations()
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _projectService.GetInvitationsByUserIdAsync(oidcSub);
+
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteProject([FromQuery] Guid projectId)
     {

@@ -24,19 +24,28 @@ public class Program
         
         builder.Services.AddControllers();
         builder.Services.AddScoped<IKaidUserService, KaidUserService>();
-        builder.Services.AddScoped<IProjectService, ProjectService>();
+        
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+        builder.Services.AddScoped<IProjectService, ProjectService>();
         builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
-        builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
+
         builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
+        builder.Services.AddScoped<IMembershipService, MembershipService>();
+
         builder.Services.AddScoped<IFlagService, FlagService>();
         builder.Services.AddScoped<IFlagRepository, FlagRepository>();
+
         builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+
         builder.Services.AddScoped<ITeamRepository, TeamRepository>();
         builder.Services.AddScoped<ITeamService, TeamService>();
+
         builder.Services.AddScoped<ICommentRepository, CommentRepository>();
         builder.Services.AddScoped<ICommentService, CommentService>();
+
         builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
+        builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
 
         builder.Services.AddAuthentication(options =>
             {

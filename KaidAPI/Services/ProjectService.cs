@@ -52,7 +52,9 @@ public class ProjectService : IProjectService
                 ProjectMembershipId = Guid.NewGuid(),
                 RoleId = 1,
                 JoinedAt = DateTime.UtcNow,
-                Status = "Active"
+                Status = "Active",
+                IsActivated = true,
+                SuperiorId = user.UserId
             };
             
             await _membershipRepository.CreateMembershipAsync(membership);
@@ -182,8 +184,45 @@ public class ProjectService : IProjectService
             }
             var projects = new List<ProjectResponse>();
             
-            var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var memberships = await _membershipRepository.GetActivatedMembershipsByUserIdAsync(user.UserId);
             
+            foreach (var membership in memberships)
+            {
+                var project = await _projectRepository.GetProjectByIdAsync(membership.ProjectId);
+                var projectResponse = new ProjectResponse
+                {
+                    ProjectId = project.ProjectId,
+                    ProjectName = project.ProjectName,
+                    ProjectDescription = project.ProjectDescription,
+                    DueDate = project.DueDate,
+                    OwnerId = user.UserId,
+                    CreatedAt = project.CreatedAt
+                };
+                projects.Add(projectResponse);
+            }
+
+            return new OperationResult { Success = true, Message = "Projects retrieved successfully", Data = projects };
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Projects get Failed");
+            return new OperationResult { Success = false, Message = "Error Get projects" };
+        }
+    }
+
+    public async Task<OperationResult> GetInvitationsByUserIdAsync(string oidcSub)
+    {
+        try
+        {
+            var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            if (user is null)
+            {
+                return new OperationResult { Success = false, Message = "User not found" };
+            }
+            var projects = new List<ProjectResponse>();
+
+            var memberships = await _membershipRepository.GetDeactivatedMembershipsByUserIdAsync(user.UserId);
+
             foreach (var membership in memberships)
             {
                 var project = await _projectRepository.GetProjectByIdAsync(membership.ProjectId);
