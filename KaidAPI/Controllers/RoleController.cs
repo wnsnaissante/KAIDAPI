@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace KaidAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class RoleController : ControllerBase
     {
         private readonly IRoleRepository _repository;
