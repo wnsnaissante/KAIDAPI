@@ -10,4 +10,5 @@ public interface IMembershipRepository {
     Task<Membership> GetMembershipByMembershipIdAsync(Guid membershipId);
     Task<OperationResult> DeleteMembershipAsync(Guid membershipId);
     Task<IEnumerable<Membership>> GetAllMembershipsAsync();
+    Task UpdateMembershipAsync(Guid membershipId, Membership membership);
 }

@@ -53,7 +53,7 @@ public class MembershipController : ControllerBase
         return BadRequest(result.Message);
     }
 
-    [HttpGet("get")]
+    [HttpGet("get-members")]
     public async Task<IActionResult> GetMembersAsync([FromQuery] Guid projectId, [FromQuery] Guid teamId)
     {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
@@ -65,18 +65,24 @@ public class MembershipController : ControllerBase
         var result = await _membershipService.GetMembersAsync(projectId, teamId);
         return Ok(result);
     }
-    //
-    // [HttpPut("update")]
-    // public async Task<IActionResult> UpdateMembershipAsync(MemberRequest membershipRequest)
-    // {
-    //     var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-    //     if (string.IsNullOrEmpty(oidcSub))
-    //     {
-    //         return Unauthorized("User does not have an access token.");
-    //     }
-    //     
-    //     var result = await _membershipService.;
-    // }
+
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateMembershipAsync([FromQuery] Guid projectMembershipId, [FromBody] MemberRequest membershipRequest)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _membershipService.UpdateMembershipAsync(oidcSub, projectMembershipId, membershipRequest);
+
+        if (result.Success)
+        {
+            return Ok();
+        }
+        return BadRequest(result.Message);
+    }
 
 
 }

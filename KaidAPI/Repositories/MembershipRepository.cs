@@ -33,7 +33,6 @@ public class MembershipRepository : IMembershipRepository
         return memberships;
     }
 
-
     public async Task<Membership> GetMembershipByProjectIdAndUserIdAsync(Guid projectId, Guid userId)
     {
         var membership = await _context.Memberships.Where(x => x.ProjectId == projectId && x.UserId == userId).FirstOrDefaultAsync();
@@ -67,5 +66,23 @@ public class MembershipRepository : IMembershipRepository
     public async Task<IEnumerable<Membership>> GetAllMembershipsAsync()
     {
         return await _context.Memberships.ToListAsync();
+    }
+
+    public async Task UpdateMembershipAsync(Guid membershipId, Membership membership)
+    {
+        var existing = await _context.Memberships.FindAsync(membership.ProjectMembershipId);
+        if (existing != null)
+        {
+            existing.ProjectMembershipId = membership.ProjectMembershipId;
+            existing.TeamId = membership.TeamId;
+            existing.UserId = membership.UserId;
+            existing.SuperiorId = membership.SuperiorId;
+            existing.RoleId = membership.RoleId;
+            existing.IsActivated = membership.IsActivated;
+            existing.Status = membership.Status;
+
+            _context.Memberships.Update(existing);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -111,8 +111,34 @@ public class MembershipService : IMembershipService
         return matchedMemberships;
     }
 
-    // public async Task<OperationResult> UpdateMembershipAsync(Guid membershipId, MemberRequest membership)
-    // {
-    //     
-    // }
+    public async Task<OperationResult> UpdateMembershipAsync(string oidcSub, Guid membershipId, MemberRequest memberRequest)
+    {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        var newMember = new Membership
+        {
+            ProjectMembershipId = membershipId,
+            TeamId = memberRequest.TeamId,
+            UserId = memberRequest.UserId,
+            SuperiorId = memberRequest.SuperiorId,
+            RoleId = memberRequest.RoleId,
+            IsActivated = memberRequest.IsActivated,
+            Status = memberRequest.Status
+        };
+
+        await _membershipRepository.UpdateMembershipAsync(membershipId, newMember);
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Membership has been edited successfully"
+        };
+    }
 }
