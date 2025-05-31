@@ -14,7 +14,7 @@ public class ProjectTaskRepository : IProjectTaskRepository
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task<string> CreateProjectTaskAsync(ProjectTaskRequest request)
+    public async Task<Guid> CreateProjectTaskAsync(ProjectTaskRequest request)
     {
         var task = new ProjectTask
         {
@@ -26,10 +26,10 @@ public class ProjectTaskRepository : IProjectTaskRepository
             TeamId = request.TeamId
         };
 
-        task.TaskId = Guid.NewGuid().ToString();
+        task.TaskId = Guid.NewGuid();
         task.CreatedAt = DateTime.UtcNow;
         task.UpdatedAt = DateTime.UtcNow;
-        task.StatusId = "Todo";
+        task.StatusId = (int)TaskStatusEnum.Todo;
         task.Priority = 1;
 
         _context.ProjectTasks.Add(task);
@@ -81,6 +81,15 @@ public class ProjectTaskRepository : IProjectTaskRepository
             .Include(t => t.Team)
                 .ThenInclude(team => team.Leader)
             .Where(t => t.Team != null && t.Team.TeamName == teamName)
+            .ToListAsync();
+    }
+    
+    public async Task<IEnumerable<ProjectTask>> GetProjectTasksByTeamIdAsync(Guid teamId)
+    {
+        return await _context.ProjectTasks
+            .Include(t => t.Team)
+                .ThenInclude(team => team.Leader)
+            .Where(t => t.Team != null && t.Team.TeamId == teamId)
             .ToListAsync();
     }
 }

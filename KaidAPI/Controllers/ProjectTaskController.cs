@@ -51,7 +51,7 @@ public class ProjectTaskController : ControllerBase
     }
 
     [HttpPut("{taskId}")]
-    public async Task<IActionResult> UpdateTask(string taskId, [FromBody] ProjectTask updatedTask)
+    public async Task<IActionResult> UpdateTask(Guid taskId, [FromBody] ProjectTask updatedTask)
     {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 
@@ -81,5 +81,69 @@ public class ProjectTaskController : ControllerBase
             return BadRequest(result.Message);
 
         return NoContent();
+    }
+
+    [HttpGet("priority-distribution")]
+    public async Task<IActionResult> GetTaskPriorityDistribution([FromQuery] Guid teamId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }   
+
+        var result = await _taskService.GetTaskPriorityDistributionAsync(oidcSub, teamId);
+        if (!result.Success) {
+            return BadRequest(result.Message);
+        }
+
+        var dict = ((IEnumerable<dynamic>)result.Data)
+            .ToDictionary(x => x.Priority.ToString(), x => (int)x.Count);
+
+        return Ok(dict);
+    }
+
+    [HttpGet("available-tasks")]
+    public async Task<IActionResult> GetAvailableTasks([FromQuery] Guid teamId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _taskService.GetAvailableTasksAsync(oidcSub, teamId);
+        if (!result.Success) {
+            return BadRequest(result.Message);
+        }
+
+        var tasks = result.Data as IEnumerable<KaidAPI.Models.ProjectTask>;
+        var dtoList = tasks?.Select(t => new KaidAPI.ViewModel.Tasks.AvailableTask
+        {
+            TaskId = t.TaskId,
+            TaskName = t.TaskName,
+            TaskDescription = t.TaskDescription,
+            Priority = t.Priority,
+            DueDate = t.DueDate,
+        }).ToList();
+
+        return Ok(dtoList);
+    }
+
+    [HttpGet("task-workload")]
+    public async Task<IActionResult> GetTaskWorkload([FromQuery] Guid teamId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier ");
+
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _taskService.GetTaskWorkloadAsync(oidcSub, teamId);
+        if (!result.Success) {
+            return BadRequest(result.Message);
+        }
+
+        return Ok(result.Data);
     }
 }
