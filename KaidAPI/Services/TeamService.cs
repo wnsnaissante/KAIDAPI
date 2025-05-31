@@ -109,9 +109,9 @@ public class TeamService : ITeamService {
                 Message = "User not found"
             };
         }
-
-        var projectOwner = _projectRepository.GetProjectByIdAsync(projectId).Result.OwnerId;
-        if (user.UserId != projectOwner)
+        
+        var membership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+        if (membership == null && membership.RoleId != 1 && membership.RoleId != 2)
         {
             return new OperationResult
             {
@@ -120,11 +120,22 @@ public class TeamService : ITeamService {
             };
         }
         
+        var projectOwner = await _projectRepository.GetProjectByIdAsync(projectId);
+        if (user.UserId != projectOwner.OwnerId)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "You do not have access to this team"
+            };
+        }
+
+        var teams = await _teamRepository.GetTeamsByProjectIdAsync(projectId);
         return new OperationResult
         {
             Success = true,
             Message = "Teams found",
-            Data = await _teamRepository.GetTeamsByProjectIdAsync(projectId)
+            Data = teams
         };
     }
 }

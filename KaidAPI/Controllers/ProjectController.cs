@@ -95,5 +95,5 @@ public class ProjectController : ControllerBase
         }
 
         return BadRequest(result);
-    }   
+    }
 }
