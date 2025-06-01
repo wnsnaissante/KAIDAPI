@@ -53,6 +53,19 @@ public class MembershipController : ControllerBase
         return BadRequest(result.Message);
     }
 
+    [HttpGet("get")]
+    public async Task<IActionResult> GetMembershipAsync([FromQuery] Guid projectId, [FromQuery] Guid teamId, [FromQuery] Guid userId)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _membershipService.GetMembershipAsync(oidcSub, projectId, teamId, userId);
+        return Ok(result);
+    }
+
     [HttpGet("get-members")]
     public async Task<IActionResult> GetMembersAsync([FromQuery] Guid projectId, [FromQuery] Guid teamId)
     {
@@ -62,7 +75,7 @@ public class MembershipController : ControllerBase
             return Unauthorized("User does not have an access token.");
         }
 
-        var result = await _membershipService.GetMembersAsync(projectId, teamId);
+        var result = await _membershipService.GetMembersAsync(oidcSub, projectId, teamId);
         return Ok(result);
     }
 
@@ -84,5 +97,39 @@ public class MembershipController : ControllerBase
         return BadRequest(result.Message);
     }
 
+    [HttpPut("invitation-accept")]
+    public async Task<IActionResult> AcceptInvitationAsync([FromQuery] Guid projectMembershipId)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
 
+        var result = await _membershipService.AcceptInvitationAsync(oidcSub, projectMembershipId);
+
+        if (result.Success)
+        {
+            return Ok();
+        }
+        return BadRequest(result.Message);
+    }
+
+    [HttpPut("invitation-deny")]
+    public async Task<IActionResult> DenyInvitationAsync([FromQuery] Guid projectMembershipId)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _membershipService.DenyInvitationAsync(oidcSub, projectMembershipId);
+
+        if (result.Success)
+        {
+            return Ok();
+        }
+        return BadRequest(result.Message);
+    }
 }

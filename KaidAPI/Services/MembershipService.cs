@@ -100,15 +100,64 @@ public class MembershipService : IMembershipService
         };
     }
 
-    public async Task<IEnumerable<Membership>> GetMembersAsync(Guid projectId, Guid teamId)
+    public async Task<OperationResult> GetMembersAsync(string oidcSub, Guid projectId, Guid teamId)
     {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
         var allMemberships = await _membershipRepository.GetAllMembershipsAsync();
 
         var matchedMemberships = allMemberships
             .Where(m => m.ProjectId == projectId && m.TeamId == teamId)
             .ToList();
 
-        return matchedMemberships;
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Success to get members",
+            Data = matchedMemberships
+        }; 
+    }
+    
+    public async Task<OperationResult> GetMembershipAsync(string oidcSub, Guid projectId, Guid teamId, Guid userId)
+    {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        var allMemberships = await _membershipRepository.GetAllMembershipsAsync();
+
+        var matchedMembership = allMemberships
+            .Where(m => m.ProjectId == projectId && m.TeamId == teamId && m.UserId == userId);
+
+        if (matchedMembership == null)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Membership not found"
+            };
+        }
+
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Success to find Membership",
+            Data = matchedMembership
+        };
     }
 
     public async Task<OperationResult> UpdateMembershipAsync(string oidcSub, Guid membershipId, MemberRequest memberRequest)
@@ -149,6 +198,70 @@ public class MembershipService : IMembershipService
         {
             Success = true,
             Message = "Membership has been edited successfully"
+        };
+    }
+
+    public async Task<OperationResult> AcceptInvitationAsync(string oidcSub, Guid membershipId)
+    {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        var userMembership = await _membershipRepository.GetMembershipByMembershipIdAsync(membershipId);
+        if (userMembership.UserId != user.UserId)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Access denied"
+            };
+        }
+
+        userMembership.IsActivated = true;
+
+        await _membershipRepository.UpdateMembershipAsync(membershipId, userMembership);
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Invitation Acceptance Successful"
+        };
+    }
+
+    public async Task<OperationResult> DenyInvitationAsync(string oidcSub, Guid membershipId)
+    {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "User not found"
+            };
+        }
+
+        var userMembership = await _membershipRepository.GetMembershipByMembershipIdAsync(membershipId);
+        if (userMembership.UserId != user.UserId)
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Access denied"
+            };
+        }
+
+        userMembership.IsActivated = true;
+
+        await _membershipRepository.DeleteMembershipAsync(membershipId);
+        return new OperationResult
+        {
+            Success = true,
+            Message = "Successfully rejected invitation"
         };
     }
 }
