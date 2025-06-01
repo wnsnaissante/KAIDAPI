@@ -1,5 +1,6 @@
 using KaidAPI.Context;
 using KaidAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace KaidAPI.Repositories;
 public class FlagRepository : IFlagRepository
@@ -32,6 +33,11 @@ public class FlagRepository : IFlagRepository
             _context.Flags.Remove(flag);
             await _context.SaveChangesAsync();
         }
-    } 
+    }
+
+    public async Task<IEnumerable<Flag>> GetFlagsByProjectIdAsync(Guid projectId)
+    {
+        return await _context.Flags.Where(f => f.ProjectId == projectId).ToListAsync();
+    }
 }
 

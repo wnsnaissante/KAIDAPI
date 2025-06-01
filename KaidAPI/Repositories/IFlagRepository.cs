@@ -6,4 +6,5 @@ public interface IFlagRepository
     Task<Flag> GetFlagByFlagIdAsync(Guid flagId);
     Task UpdateFlagAsync(Flag flag);
     Task DeleteFlagAsync(Guid flagId);
+    Task<IEnumerable<Flag>> GetFlagsByProjectIdAsync(Guid projectId);
 }

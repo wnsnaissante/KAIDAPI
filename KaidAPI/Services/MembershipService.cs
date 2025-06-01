@@ -123,6 +123,16 @@ public class MembershipService : IMembershipService
             };
         }
 
+        var userMembership = await _membershipRepository.GetMembershipByMembershipIdAsync(membershipId);
+        if (userMembership.RoleId != 1) 
+        {
+            return new OperationResult
+            {
+                Success = false,
+                Message = "Access denied"
+            };
+        }
+
         var newMember = new Membership
         {
             ProjectMembershipId = membershipId,
