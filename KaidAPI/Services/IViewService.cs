@@ -1,4 +1,6 @@
-namespace KaidAPI.Services
+using Microsoft.AspNetCore.Mvc;
+
+namespace KaidAPI.Services;
 
 public interface IViewService
 {

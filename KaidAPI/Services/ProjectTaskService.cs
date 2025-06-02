@@ -57,7 +57,7 @@ namespace KaidAPI.Services
             try
             {
                 if (!await TeamExistsAsync(request.TeamId))
-                    return null;
+                    return Guid.Empty;
 
                 var result = await _taskRepository.CreateProjectTaskAsync(request);
                 return result;

@@ -44,6 +44,12 @@ public class MembershipRepository : IMembershipRepository
         return membership;
     }
 
+    public async Task<List<Membership>> GetMembershipsByUserIdAsync(Guid userId)
+    {
+        var memberships = await _context.Memberships.Where(x => x.UserId == userId && x.IsActivated == true).ToListAsync();
+        return memberships;
+    }
+
     public async Task<OperationResult> DeleteMembershipAsync(Guid membershipId) {
         var membership = await _context.Memberships.FindAsync(membershipId);
         if (membership == null) {

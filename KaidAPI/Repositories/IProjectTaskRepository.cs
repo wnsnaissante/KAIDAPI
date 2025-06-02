@@ -5,7 +5,7 @@ namespace KaidAPI.Repositories;
 
 public interface IProjectTaskRepository
 {
-    Task<string> CreateProjectTaskAsync(ProjectTaskRequest request);
+    Task<Guid> CreateProjectTaskAsync(ProjectTaskRequest request);
     Task<ProjectTask?> GetProjectTaskByIdAsync(string taskId);
     Task<List<ProjectTask>> GetAllProjectTasksAsync();
     Task UpdateProjectTaskAsync(ProjectTask task);
