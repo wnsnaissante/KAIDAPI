@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using KaidAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using TaskStatus = KaidAPI.Models.TaskStatus;
 
 namespace KaidAPI.Context;
 
@@ -16,4 +17,11 @@ public class ServerDbContext: DbContext
     public DbSet<Flag> Flags { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Comment> Comments { get; set; }
+    public DbSet<TaskStatus> TaskStatuses { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfiguration(new TaskStatusConfiguration());
+    }
 }

@@ -8,7 +8,7 @@ namespace KaidAPI.Controllers;
 public class UserInfoController : ControllerBase
 {
     [HttpGet] 
-    [Route("api/userinfo")]
+    [Route("api/v1/userinfo")]
     public IActionResult GetUserInfo()
     {
         var user = HttpContext.User;

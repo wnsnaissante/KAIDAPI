@@ -11,4 +11,5 @@ public interface IProjectTaskRepository
     Task UpdateProjectTaskAsync(ProjectTask task);
     Task DeleteProjectTaskAsync(string taskId);
     Task<IEnumerable<ProjectTask>> GetProjectTasksByTeamAsync(string teamName);
+    Task<IEnumerable<ProjectTask>> GetProjectTasksByTeamIdAsync(Guid teamId);
 }

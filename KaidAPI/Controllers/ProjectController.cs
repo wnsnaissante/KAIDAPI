@@ -76,6 +76,7 @@ public class ProjectController : ControllerBase
 
         return BadRequest(result);
     }
+    
 
     [HttpGet("get-invitations")]
     public async Task<IActionResult> GetInvitations()
@@ -115,5 +116,5 @@ public class ProjectController : ControllerBase
         }
 
         return BadRequest(result);
-    }   
+    }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace KaidAPI.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class UserController : ControllerBase
 {
     private readonly IUserRepository _userRepository;

@@ -52,7 +52,7 @@ namespace KaidAPI.Services
             return team != null;
         }
 
-        public async Task<string> CreateProjectTaskAsync(ProjectTaskRequest request)
+        public async Task<Guid> CreateProjectTaskAsync(ProjectTaskRequest request)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace KaidAPI.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "CreateProjectTaskAsync failed");
-                return null;
+                return Guid.Empty;
             }
         }
 
@@ -172,5 +172,101 @@ namespace KaidAPI.Services
                 return new { Success = false, Message = "Unexpected error while retrieving tasks" };
             }
         }
+        
+        public async Task<OperationResult> GetTaskPriorityDistributionAsync(string oidcSub, Guid teamId)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+                if (user is null)
+                    return new OperationResult { Success = false, Message = "User not found" };
+
+                var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+                var teamMembership = memberships.FirstOrDefault(m => m.RoleId == 1 || m.RoleId == 2);
+
+                if (teamMembership is null)
+                    return new OperationResult { Success = false, Message = "Access denied to team tasks" };
+
+                var tasks = await _taskRepository.GetProjectTasksByTeamIdAsync(teamId);
+
+                var priorityDistribution = tasks.GroupBy(t => t.Priority)
+                    .Select(g => new {
+                        Priority = g.Key,
+                        Count = g.Count()
+                    })
+                    .OrderBy(p => p.Priority)
+                    .ToList();
+
+                return new OperationResult { Success = true, Data = priorityDistribution };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetTaskPriorityDistributionAsync failed");
+                return new OperationResult { Success = false, Message = "Unexpected error while retrieving task priority distribution" };
+            }
+        }
+
+        public async Task<OperationResult> GetAvailableTasksAsync(string oidcSub, Guid teamId)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+                if (user is null)
+                    return new OperationResult { Success = false, Message = "User not found" };
+
+                var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+                var teamMembership = memberships.FirstOrDefault(m => m.RoleId == 1 || m.RoleId == 2);
+
+                if (teamMembership is null)
+                    return new OperationResult { Success = false, Message = "Access denied to team tasks" };
+
+                var tasks = await _taskRepository.GetProjectTasksByTeamIdAsync(teamId);
+
+                var availableTasks = tasks.Where(t => t.StatusId == (int)TaskStatusEnum.Todo).ToList(); 
+
+                return new OperationResult { Success = true, Data = availableTasks };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAvailableTasksAsync failed");
+                return new OperationResult { Success = false, Message = "Unexpected error while retrieving available tasks" };  
+            }
+        }
+        
+        public async Task<OperationResult> GetTaskWorkloadAsync(string oidcSub, Guid teamId)
+        {
+            try
+            {
+                var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+                if (user is null)
+                    return new OperationResult { Success = false, Message = "User not found" };
+
+                var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+                var teamMembership = memberships.FirstOrDefault(m => m.RoleId == 1 || m.RoleId == 2);
+                
+                if (teamMembership is null)
+                    return new OperationResult { Success = false, Message = "Access denied to team tasks" };
+
+                var tasks = await _taskRepository.GetProjectTasksByTeamIdAsync(teamId);
+
+                var totalCount = tasks.Count();
+                var workload = tasks.GroupBy(t => t.Assignee)
+                    .Select(g => new {
+                        Assignee = g.Key,
+                        Count = g.Count(),
+                        Percent = totalCount == 0 ? 0 : (g.Count() * 100.0) / totalCount
+                    })
+                    .OrderBy(g => g.Assignee)
+                    .ToList();
+
+                return new OperationResult { Success = true, Data = workload };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetTaskWorkloadAsync failed");
+                return new OperationResult { Success = false, Message = "Unexpected error while retrieving task workload" };
+            }
+        }
+        
     }
 }
