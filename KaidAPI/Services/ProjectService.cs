@@ -246,4 +246,31 @@ public class ProjectService : IProjectService
             return new OperationResult { Success = false, Message = "Error Get projects" };
         }
     }
+
+    public async Task<OperationResult> GetProjectDeadlineAsync(string oidcSub, Guid projectId)
+    {
+        try
+        {
+            var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            if (user is null)
+            {
+                return new OperationResult { Success = false, Message = "User not found" };
+            }
+            var project = await _projectRepository.GetProjectByIdAsync(projectId);
+            if (project is null)
+            {
+                return new OperationResult { Success = false, Message = "Project not found" };
+            }
+            if (project.OwnerId != user.UserId)
+            {
+                return new OperationResult { Success = false, Message = "No permission to get project deadline" };
+            }
+            return new OperationResult { Success = true, Message = "Project deadline retrieved successfully", Data = project.DueDate };
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Project deadline get Failed");
+            return new OperationResult { Success = false, Message = "Error Get project deadline" };
+        }
+    }
 }

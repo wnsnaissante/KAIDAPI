@@ -117,4 +117,24 @@ public class ProjectController : ControllerBase
 
         return BadRequest(result);
     }
+
+    [HttpGet("get-project-deadline")]
+    public async Task<IActionResult> GetProjectDeadline([FromQuery] Guid projectId)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+    
+        var result = await _projectService.GetProjectDeadlineAsync(oidcSub, projectId);
+    
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+    
+        return BadRequest(result);
+    }
 }
