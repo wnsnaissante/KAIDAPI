@@ -10,7 +10,7 @@ namespace KaidAPI.Controllers
 
         public ViewController(ILogger<ViewController> logger)
         {
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
     }

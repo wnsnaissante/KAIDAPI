@@ -37,4 +37,9 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .FirstOrDefaultAsync(u => u.AuthentikSubject == oidcSub);
     }
+
+    public async Task<String> GetUserNameByIdAsync(Guid userId)
+    {
+        return (await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId))?.Username ?? "N/A";
+    }
 }
