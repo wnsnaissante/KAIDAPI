@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KaidAPI.Migrations
 {
     [DbContext(typeof(ServerDbContext))]
-    [Migration("20250526210355_initial")]
-    partial class initial
+    [Migration("20250606140316_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,13 +71,11 @@ namespace KaidAPI.Migrations
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Reporter")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<Guid>("Reporter")
+                        .HasColumnType("char(36)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("TeamId")
                         .HasColumnType("char(36)");
@@ -125,11 +123,15 @@ namespace KaidAPI.Migrations
 
             modelBuilder.Entity("KaidAPI.Models.ProjectTask", b =>
                 {
-                    b.Property<string>("TaskId")
-                        .HasColumnType("varchar(255)");
+                    b.Property<Guid>("TaskId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("Assignee")
                         .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
@@ -143,9 +145,8 @@ namespace KaidAPI.Migrations
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("StatusId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
 
                     b.Property<string>("TaskDescription")
                         .IsRequired()
@@ -189,6 +190,59 @@ namespace KaidAPI.Migrations
                     b.HasKey("RoleId");
 
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("KaidAPI.Models.TaskStatus", b =>
+                {
+                    b.Property<int>("StatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("StatusId"));
+
+                    b.Property<string>("StatusDescription")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StatusName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("StatusId");
+
+                    b.ToTable("TaskStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            StatusId = 1,
+                            StatusDescription = "To Do",
+                            StatusName = "Todo"
+                        },
+                        new
+                        {
+                            StatusId = 2,
+                            StatusDescription = "Work in Progress",
+                            StatusName = "Work in Progress"
+                        },
+                        new
+                        {
+                            StatusId = 3,
+                            StatusDescription = "Delayed",
+                            StatusName = "Delayed"
+                        },
+                        new
+                        {
+                            StatusId = 4,
+                            StatusDescription = "Finished",
+                            StatusName = "Finished"
+                        },
+                        new
+                        {
+                            StatusId = 5,
+                            StatusDescription = "Done",
+                            StatusName = "Done"
+                        });
                 });
 
             modelBuilder.Entity("KaidAPI.Models.Team", b =>
