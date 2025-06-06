@@ -7,7 +7,7 @@ public enum TaskStatusEnum
     Todo = 1,
     WorkInProgress = 2,
     Delayed = 3,
-    Finished = 4
+    Finished = 4,
 }
 
 public class TaskStatus
@@ -21,6 +21,8 @@ public class TaskStatusConfiguration : IEntityTypeConfiguration<TaskStatus>
 {
     public void Configure(EntityTypeBuilder<TaskStatus> builder)
     {
+        builder.HasKey(t => t.StatusId);
+        
         builder.HasData(
             new TaskStatus 
             { 

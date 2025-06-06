@@ -83,67 +83,118 @@ public class ProjectTaskController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("priority-distribution")]
+    // PM View's Project Tasks Distribution
+    [HttpGet("project-task-distribution")]
+    public async Task<IActionResult> GetProjectTaskDistribution([FromQuery] Guid projectId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _taskService.GetProjectTaskDistributionAsync(oidcSub, projectId);
+        return Ok(result);
+    }
+
+    // General View & TL View's Task Priority Distribution
+    [HttpGet("task-priority-distribution")]
     public async Task<IActionResult> GetTaskPriorityDistribution([FromQuery] Guid teamId) {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 
         if (string.IsNullOrEmpty(oidcSub))
         {
             return Unauthorized("User does not have an access token.");
-        }   
-
-        var result = await _taskService.GetTaskPriorityDistributionAsync(oidcSub, teamId);
-        if (!result.Success) {
-            return BadRequest(result.Message);
         }
 
-        var dict = ((IEnumerable<dynamic>)result.Data)
-            .ToDictionary(x => x.Priority.ToString(), x => (int)x.Count);
-
-        return Ok(dict);
+        var result = await _taskService.GetTaskPriorityDistributionAsync(oidcSub, teamId);
+        return Ok(result);
     }
 
+    // General View & TL View's Available Tasks
     [HttpGet("available-tasks")]
     public async Task<IActionResult> GetAvailableTasks([FromQuery] Guid teamId) {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-
         if (string.IsNullOrEmpty(oidcSub))
         {
             return Unauthorized("User does not have an access token.");
         }
 
         var result = await _taskService.GetAvailableTasksAsync(oidcSub, teamId);
-        if (!result.Success) {
-            return BadRequest(result.Message);
-        }
-
-        var tasks = result.Data as IEnumerable<KaidAPI.Models.ProjectTask>;
-        var dtoList = tasks?.Select(t => new KaidAPI.ViewModel.Tasks.AvailableTask
-        {
-            TaskId = t.TaskId,
-            TaskName = t.TaskName,
-            TaskDescription = t.TaskDescription,
-            Priority = t.Priority,
-            DueDate = t.DueDate,
-        }).ToList();
-
-        return Ok(dtoList);
+        return Ok(result);
     }
 
-    [HttpGet("task-workload")]
-    public async Task<IActionResult> GetTaskWorkload([FromQuery] Guid teamId) {
-        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier ");
-
+    // TL View's Task Workload
+    [HttpGet("team-task-workload")]
+    public async Task<IActionResult> GetTeamTaskWorkload([FromQuery] Guid teamId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
         if (string.IsNullOrEmpty(oidcSub))
         {
             return Unauthorized("User does not have an access token.");
         }
 
-        var result = await _taskService.GetTaskWorkloadAsync(oidcSub, teamId);
-        if (!result.Success) {
-            return BadRequest(result.Message);
+        var result = await _taskService.GetTeamTaskWorkloadAsync(oidcSub, teamId);
+        return Ok(result);
+    }
+
+    [HttpGet("completed-tasks-past-week")]
+    public async Task<IActionResult> GetCompletedTasksPastWeek([FromQuery] Guid projectId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
         }
 
-        return Ok(result.Data);
+        var result = await _taskService.GetCompletedTasksPastWeekAsync(oidcSub, projectId);
+        return Ok(result);
+    }
+
+    [HttpGet("uncompleted-tasks-past-week")]
+    public async Task<IActionResult> GetUncompletedTasksPastWeek([FromQuery] Guid projectId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _taskService.GetUncompletedTasksPastWeekAsync(oidcSub, projectId);
+        return Ok(result);
+    }
+
+    [HttpGet("left-tasks")]
+    public async Task<IActionResult> GetLeftTasks([FromQuery] Guid projectId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _taskService.GetLeftTasksCountAsync(oidcSub, projectId);
+        return Ok(result);
+    }
+
+    [HttpGet("urgent-tasks")]
+    public async Task<IActionResult> GetUrgentTasks([FromQuery] Guid projectId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _taskService.GetUrgentTasksCountAsync(oidcSub, projectId);
+
+        return Ok(result);
+    }
+
+    [HttpGet("assigned-tasks")]
+    public async Task<IActionResult> GetAssignedTasks([FromQuery] Guid projectId) {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+        {
+            return Unauthorized("User does not have an access token.");
+        }
+
+        var result = await _taskService.GetAssignedTasksAsync(oidcSub, projectId);
+        return Ok(result);
     }
 }

@@ -1,8 +1,6 @@
 using KaidAPI.Models;
 using KaidAPI.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using KaidAPI.ViewModel.Tasks;
 
 namespace KaidAPI.Services
 {
@@ -14,8 +12,14 @@ namespace KaidAPI.Services
         Task<OperationResult> UpdateProjectTaskAsync(ProjectTask task, string oidcSub);
         Task<OperationResult> DeleteProjectTaskAsync(string taskId, string oidcSub);
         Task<object> GetTaskSummariesByTeamAsync(string teamName, string oidcSub);
-        Task<OperationResult> GetTaskWorkloadAsync(string oidcSub, Guid teamId);
-        Task<OperationResult> GetAvailableTasksAsync(string oidcSub, Guid teamId);
+        Task<List<TaskDistribution>> GetProjectTaskDistributionAsync(string oidcSub, Guid projectId);
         Task<OperationResult> GetTaskPriorityDistributionAsync(string oidcSub, Guid teamId);
+        Task<List<AvailableTask>> GetAvailableTasksAsync(string oidcSub, Guid teamId);
+        Task<List<TaskWorkload>> GetTeamTaskWorkloadAsync(string oidcSub, Guid teamId);
+        Task<List<TaskPreview>> GetAssignedTasksAsync(string oidcSub, Guid projectId);
+        Task<int> GetCompletedTasksPastWeekAsync(string oidcSub, Guid projectId);
+        Task<int> GetUncompletedTasksPastWeekAsync(string oidcSub, Guid projectId);
+        Task<int> GetLeftTasksCountAsync(string oidcSub, Guid projectId);
+        Task<int> GetUrgentTasksCountAsync(string oidcSub, Guid projectId);
     }
 }

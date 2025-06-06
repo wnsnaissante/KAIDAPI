@@ -92,4 +92,18 @@ public class ProjectTaskRepository : IProjectTaskRepository
             .Where(t => t.Team != null && t.Team.TeamId == teamId)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<ProjectTask>> GetAssignedTasksAsync(Guid userId)
+    {
+        return await _context.ProjectTasks
+            .Where(t => t.Assignee == userId)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<ProjectTask>> GetProjectTasksByProjectIdAsync(Guid projectId)
+    {
+        return await _context.ProjectTasks
+            .Where(t => t.ProjectId == projectId)
+            .ToListAsync();
+    }
 }

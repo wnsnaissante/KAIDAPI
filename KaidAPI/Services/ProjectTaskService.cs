@@ -1,6 +1,8 @@
 using KaidAPI.Models;
 using KaidAPI.ViewModel;
 using KaidAPI.Repositories;
+using KaidAPI.ViewModel.Tasks;
+
 using Microsoft.Extensions.Logging;
 
 namespace KaidAPI.Services
@@ -173,6 +175,35 @@ namespace KaidAPI.Services
             }
         }
         
+        // PM View's Team Tasks Distribution
+        public async Task<List<TaskDistribution>> GetProjectTaskDistributionAsync(string oidcSub, Guid projectId) {
+            var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            if (user is null)
+                return new List<TaskDistribution>();
+
+            var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+
+            if (userMembership is null)
+                return new List<TaskDistribution>();
+
+            if (userMembership.RoleId == 1) {
+                var tasks = await _taskRepository.GetProjectTasksByProjectIdAsync(projectId);
+                var teamTaskDistribution = tasks.GroupBy(t => t.Team?.TeamName)
+                    .Select(g => new TaskDistribution {
+                        TeamName = g.Key ?? "N/A",
+                        Percent = (float)(g.Count() * 100.0 / tasks.Count())
+                    }).ToList();
+
+                return teamTaskDistribution;
+            }
+            else
+            {
+                return new List<TaskDistribution>();
+            }
+        }
+
+
+        // General View & TL View's Task Priority Distribution
         public async Task<OperationResult> GetTaskPriorityDistributionAsync(string oidcSub, Guid teamId)
         {
             try
@@ -182,70 +213,92 @@ namespace KaidAPI.Services
                     return new OperationResult { Success = false, Message = "User not found" };
 
                 var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
-                var teamMembership = memberships.FirstOrDefault(m => m.RoleId == 1 || m.RoleId == 2);
+                var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(teamId, user.UserId);
 
-                if (teamMembership is null)
+                if (userMembership is null)
                     return new OperationResult { Success = false, Message = "Access denied to team tasks" };
-
-                var tasks = await _taskRepository.GetProjectTasksByTeamIdAsync(teamId);
-
-                var priorityDistribution = tasks.GroupBy(t => t.Priority)
-                    .Select(g => new {
-                        Priority = g.Key,
-                        Count = g.Count()
-                    })
-                    .OrderBy(p => p.Priority)
-                    .ToList();
-
-                return new OperationResult { Success = true, Data = priorityDistribution };
+                
+                if (userMembership.RoleId == 1) {
+                    return new OperationResult { Success = false, Message = "Access denied to team tasks" };
+                }
+                if (userMembership.RoleId == 2) {
+                    var tasks = await _taskRepository.GetProjectTasksByTeamIdAsync(teamId);
+                    var priorityDistribution = tasks.GroupBy(t => t.Priority)
+                        .Select(g => new {
+                            Priority = g.Key,
+                            Count = g.Count()
+                        })
+                        .OrderBy(p => p.Priority)
+                        .ToList();
+                    return new OperationResult { Success = true, Data = priorityDistribution };
+                } else if (userMembership.RoleId == 3) {
+                    var tasks = await _taskRepository.GetAllProjectTasksAsync();
+                    var userTasks = tasks.Where(t => t.Assignee == user.UserId).ToList();
+                    var priorityDistribution = userTasks.GroupBy(t => t.Priority)
+                        .Select(g => new {
+                            Priority = g.Key,
+                            Count = g.Count()
+                        })
+                        .OrderBy(p => p.Priority)
+                        .ToList();
+                    return new OperationResult { Success = true, Data = priorityDistribution };
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetTaskPriorityDistributionAsync failed");
                 return new OperationResult { Success = false, Message = "Unexpected error while retrieving task priority distribution" };
             }
+            return new OperationResult { Success = false, Message = "Unexpected error while retrieving task priority distribution" };
         }
 
-        public async Task<OperationResult> GetAvailableTasksAsync(string oidcSub, Guid teamId)
+        // General View & TL View's Available Tasks
+        public async Task<List<AvailableTask>> GetAvailableTasksAsync(string oidcSub, Guid teamId)
         {
             try
             {
                 var user = await _userRepository.GetUserByOidcAsync(oidcSub);
                 if (user is null)
-                    return new OperationResult { Success = false, Message = "User not found" };
+                    return new List<AvailableTask>();
 
                 var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
-                var teamMembership = memberships.FirstOrDefault(m => m.RoleId == 1 || m.RoleId == 2);
+                var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(teamId, user.UserId);
 
-                if (teamMembership is null)
-                    return new OperationResult { Success = false, Message = "Access denied to team tasks" };
+                if (userMembership is null)
+                    return new List<AvailableTask>();
 
                 var tasks = await _taskRepository.GetProjectTasksByTeamIdAsync(teamId);
 
-                var availableTasks = tasks.Where(t => t.StatusId == (int)TaskStatusEnum.Todo).ToList(); 
+                var availableTasks = tasks.Where(t => t.StatusId == (int)TaskStatusEnum.Todo && t.Assignee == null).ToList(); 
 
-                return new OperationResult { Success = true, Data = availableTasks };
+                return availableTasks.Select(t => new AvailableTask {
+                    TaskName = t.TaskName,
+                    TaskDescription = t.TaskDescription,
+                    Priority = t.Priority,
+                    DueDate = t.DueDate
+                }).ToList();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetAvailableTasksAsync failed");
-                return new OperationResult { Success = false, Message = "Unexpected error while retrieving available tasks" };  
+                return new List<AvailableTask>();
             }
         }
         
-        public async Task<OperationResult> GetTaskWorkloadAsync(string oidcSub, Guid teamId)
+        // TL View's Task Workload
+        public async Task<List<TaskWorkload>> GetTeamTaskWorkloadAsync(string oidcSub, Guid teamId)
         {
             try
             {
                 var user = await _userRepository.GetUserByOidcAsync(oidcSub);
                 if (user is null)
-                    return new OperationResult { Success = false, Message = "User not found" };
+                    return new List<TaskWorkload>();
 
                 var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
-                var teamMembership = memberships.FirstOrDefault(m => m.RoleId == 1 || m.RoleId == 2);
+                var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(teamId, user.UserId);
                 
-                if (teamMembership is null)
-                    return new OperationResult { Success = false, Message = "Access denied to team tasks" };
+                if (userMembership is null)
+                    return new List<TaskWorkload>();
 
                 var tasks = await _taskRepository.GetProjectTasksByTeamIdAsync(teamId);
 
@@ -259,14 +312,144 @@ namespace KaidAPI.Services
                     .OrderBy(g => g.Assignee)
                     .ToList();
 
-                return new OperationResult { Success = true, Data = workload };
+                return workload.Select(w => new TaskWorkload {
+                    Username = _userRepository.GetUserNameByIdAsync(w.Assignee).Result,
+                    Percent = (float)w.Percent
+                }).ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "GetTaskWorkloadAsync failed");
-                return new OperationResult { Success = false, Message = "Unexpected error while retrieving task workload" };
+                _logger.LogError(ex, "GetTeamTaskWorkloadAsync failed");
+                return new List<TaskWorkload>();
             }
         }
         
+        // General View's Assigned Tasks
+        public async Task<List<TaskPreview>> GetAssignedTasksAsync(string oidcSub, Guid projectId) 
+        {
+            var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            if (user is null)
+                return new List<TaskPreview>();
+
+            var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+
+            if (userMembership is null)
+                return new List<TaskPreview>();
+
+            var assignedTasks = await _taskRepository.GetAssignedTasksAsync(user.UserId);
+            var taskPreviews = assignedTasks.Select(t => new TaskPreview {
+                TaskName = t.TaskName,
+                TaskDescription = t.TaskDescription,
+                Priority = t.Priority,
+                DueDate = t.DueDate
+            }).ToList();
+            return taskPreviews;
+        }
+
+        public async Task<int> GetCompletedTasksPastWeekAsync(string oidcSub, Guid projectId) 
+        {
+            var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            if (user is null)
+                return 0;
+
+            var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+
+            if (userMembership is null)
+                return 0;
+
+            var tasks = await _taskRepository.GetProjectTasksByProjectIdAsync(projectId);
+
+            if (userMembership.RoleId == 2) {
+                var teamUserIds = memberships.Select(m => m.UserId).ToList();
+                var completedTasks = tasks.Where(t => t.StatusId == (int)TaskStatusEnum.Finished && t.CreatedAt >= DateTime.Now.AddDays(-7) && teamUserIds.Contains(t.Assignee)).ToList();
+                return completedTasks.Count();
+            } else if (userMembership.RoleId == 3) {
+                var completedTasks = tasks.Where(t => t.StatusId == (int)TaskStatusEnum.Finished && t.CreatedAt >= DateTime.Now.AddDays(-7) && t.Assignee == user.UserId).ToList();
+                return completedTasks.Count();
+            } else {
+                return 0;
+            }
+        }
+
+        public async Task<int> GetUncompletedTasksPastWeekAsync(string oidcSub, Guid projectId) 
+        {
+            var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            if (user is null)
+                return 0;
+
+            var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+
+            if (userMembership is null)
+                return 0;
+
+            var tasks = await _taskRepository.GetProjectTasksByProjectIdAsync(projectId);
+
+            if (userMembership.RoleId == 2) {
+                var teamUserIds = memberships.Select(m => m.UserId).ToList();
+                var uncompletedTasks = tasks.Where(t => t.StatusId != (int)TaskStatusEnum.Finished && t.CreatedAt >= DateTime.Now.AddDays(-7) && teamUserIds.Contains(t.Assignee)).ToList();
+                return uncompletedTasks.Count();
+            } else if (userMembership.RoleId == 3) {
+                var uncompletedTasks = tasks.Where(t => t.StatusId != (int)TaskStatusEnum.Finished && t.CreatedAt >= DateTime.Now.AddDays(-7) && t.Assignee == user.UserId).ToList();
+                return uncompletedTasks.Count();
+            } else {
+                return 0;
+            }
+        }
+
+        public async Task<int> GetLeftTasksCountAsync(string oidcSub, Guid projectId)
+        {
+            var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            if (user is null)
+                return 0;
+
+            var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+
+            if (userMembership is null)
+                return 0;
+
+            var tasks = await _taskRepository.GetProjectTasksByProjectIdAsync(projectId);
+
+            if (userMembership.RoleId == 2) {
+                var teamUserIds = memberships.Select(m => m.UserId).ToList();
+                var leftTasks = tasks.Where(t => t.StatusId != (int)TaskStatusEnum.Finished && teamUserIds.Contains(t.Assignee)).ToList();
+                return leftTasks.Count();
+            } else if (userMembership.RoleId == 3) {
+                var leftTasks = tasks.Where(t => t.StatusId != (int)TaskStatusEnum.Finished && t.Assignee == user.UserId).ToList();
+                return leftTasks.Count();
+            } else {
+                return 0;
+            }
+        }
+
+        public async Task<int> GetUrgentTasksCountAsync(string oidcSub, Guid projectId) {
+            var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            if (user is null)
+                return 0;
+
+            var memberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+
+            if (userMembership is null)
+                return 0;
+
+            var tasks = await _taskRepository.GetProjectTasksByProjectIdAsync(projectId);
+
+            if (userMembership.RoleId == 2) {
+                var teamUserIds = memberships.Select(m => m.UserId).ToList();
+                var urgentTasks = tasks.Where(t => 
+                    t.DueDate <= DateTime.Now.AddDays(7) && 
+                    teamUserIds.Contains(t.Assignee)).ToList();
+                return urgentTasks.Count();
+            } else if (userMembership.RoleId == 3) {
+                var urgentTasks = tasks.Where(t => t.DueDate <= DateTime.Now.AddDays(7) && t.Assignee == user.UserId).ToList();
+                return urgentTasks.Count();
+            } else {
+                return 0;
+            }
+        }
     }
 }
