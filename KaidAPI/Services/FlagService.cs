@@ -17,14 +17,14 @@ public class FlagService : IFlagService
         _membershipRepository = membershipRepository ?? throw new ArgumentNullException(nameof(membershipRepository));
     }
 
-    public async Task<Guid> CreateFlagAsync(FlagRequest flagRequest)
+    public async Task<Guid> CreateFlagAsync(String oidcSub, FlagRequest flagRequest)
     {
         var flag = new Flag
         {
             FlagId = Guid.NewGuid(),
             FlagDescription = flagRequest.FlagDescription,
-            Status = flagRequest.Status,
-            Reporter = flagRequest.Reporter,
+            Status = FlagStatus.Todo,
+            Reporter = (await _userRepository.GetUserByOidcAsync(oidcSub)).UserId,
             CreatedAt = DateTime.UtcNow,
             Priority = flagRequest.Priority
         };
@@ -90,7 +90,6 @@ public class FlagService : IFlagService
         flag.Status = flagRequest.Status;
         flag.Priority = flagRequest.Priority;
         flag.FlagDescription = flagRequest.FlagDescription;
-        flag.Reporter = flagRequest.Reporter;
 
         await _flagRepository.UpdateFlagAsync(flag);
 
@@ -132,4 +131,74 @@ public class FlagService : IFlagService
         return new OperationResult { Success = true, Data = accessibleFlags };
     }
 
+
+    public async Task<OperationResult> GetRaisedFlagsCountAsync(string oidcSub, Guid projectId)
+    {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null)
+            return new OperationResult { Success = false, Message = "User not found" };
+        var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+        var flags = await _flagRepository.GetFlagsByProjectIdAsync(projectId);
+
+        if (userMembership.RoleId == 1) {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+            var raisedFlags = flags.Where(f => f.CreatedAt >= sevenDaysAgo).Count();
+            return new OperationResult { Success = true, Data = raisedFlags };
+        } 
+        else if (userMembership.RoleId == 2) 
+        {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+            var userMemberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var teamUserIds = userMemberships.Select(m => m.UserId).ToList();
+            var raisedFlags = flags.Where(f => f.CreatedAt >= sevenDaysAgo && teamUserIds.Contains(f.Reporter)).Count();
+            return new OperationResult { Success = true, Data = raisedFlags };
+        }
+        return new OperationResult { Success = false, Message = "User not found" };
+    }
+
+    public async Task<OperationResult> GetSolvedFlagsCountAsync(string oidcSub, Guid projectId)
+    {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null)
+            return new OperationResult { Success = false, Message = "User not found" };
+
+        var flags = await _flagRepository.GetFlagsByProjectIdAsync(projectId);
+        var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+        if (userMembership.RoleId == 1) {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+            var resolvedFlags = flags.Where(f => f.CreatedAt >= sevenDaysAgo && f.Status == FlagStatus.Solved).Count();
+            return new OperationResult { Success = true, Data = resolvedFlags };
+        } 
+        else if (userMembership.RoleId == 2) 
+        {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+            var userMemberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var teamUserIds = userMemberships.Select(m => m.UserId).ToList();
+            var resolvedFlags = flags.Where(f => f.CreatedAt >= sevenDaysAgo && f.Status == FlagStatus.Solved && teamUserIds.Contains(f.Reporter)).Count();
+            return new OperationResult { Success = true, Data = resolvedFlags };
+        }
+        return new OperationResult { Success = false, Message = "User not found" };
+    }
+
+    public async Task<OperationResult> GetUnsolvedFlagsCountAsync(string oidcSub, Guid projectId)
+    {
+        var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+        if (user == null)
+            return new OperationResult { Success = false, Message = "User not found" };
+
+        var flags = await _flagRepository.GetFlagsByProjectIdAsync(projectId);
+        var userMembership = await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(projectId, user.UserId);
+        if (userMembership.RoleId == 1) {
+            var unsolvedFlags = flags.Where(f => f.Status == FlagStatus.Unsolved).Count();
+            return new OperationResult { Success = true, Data = unsolvedFlags };
+        } 
+        else if (userMembership.RoleId == 2) 
+        {
+            var userMemberships = await _membershipRepository.GetMembershipsByUserIdAsync(user.UserId);
+            var teamUserIds = userMemberships.Select(m => m.UserId).ToList();
+            var unsolvedFlags = flags.Where(f => f.Status == FlagStatus.Unsolved && teamUserIds.Contains(f.Reporter)).Count();
+            return new OperationResult { Success = true, Data = unsolvedFlags };
+        }
+        return new OperationResult { Success = false, Message = "User not found" };
+    }
 }

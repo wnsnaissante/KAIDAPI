@@ -27,7 +27,7 @@ public class FlagController : ControllerBase
         {
             return Unauthorized("User does not have an access token.");
         }
-        var result = await _flagService.CreateFlagAsync(flag);
+        var result = await _flagService.CreateFlagAsync(oidcSub, flag);
         return Ok(result);
     }
 
@@ -75,6 +75,42 @@ public class FlagController : ControllerBase
             return Unauthorized("User does not have an access token.");
 
         var result = await _flagService.GetFlagsByProjectAsync(oidcSub, projectId);
+        if (!result.Success) return Forbid(result.Message);
+        return Ok(result.Data);
+    }
+
+    [HttpGet("get-raised-flags-count")]
+    public async Task<IActionResult> GetRaisedFlagsCountAsync([FromQuery] Guid projectId)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+            return Unauthorized("User does not have an access token.");
+
+        var result = await _flagService.GetRaisedFlagsCountAsync(oidcSub, projectId);
+        if (!result.Success) return Forbid(result.Message);
+        return Ok(result.Data);
+    }
+
+    [HttpGet("get-solved-flags-count")]
+    public async Task<IActionResult> GetSolvedFlagsCountAsync([FromQuery] Guid projectId)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+            return Unauthorized("User does not have an access token.");
+
+        var result = await _flagService.GetSolvedFlagsCountAsync(oidcSub, projectId);
+        if (!result.Success) return Forbid(result.Message);
+        return Ok(result.Data);
+    }
+
+    [HttpGet("get-unsolved-flags-count")]
+    public async Task<IActionResult> GetUnsolvedFlagsCountAsync([FromQuery] Guid projectId)
+    {
+        var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        if (string.IsNullOrEmpty(oidcSub))
+            return Unauthorized("User does not have an access token.");
+
+        var result = await _flagService.GetUnsolvedFlagsCountAsync(oidcSub, projectId);
         if (!result.Success) return Forbid(result.Message);
         return Ok(result.Data);
     }
