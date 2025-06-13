@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace KaidAPI.Migrations
 {
     /// <inheritdoc />
@@ -46,6 +48,23 @@ namespace KaidAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.RoleId);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "TaskStatuses",
+                columns: table => new
+                {
+                    StatusId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    StatusName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StatusDescription = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaskStatuses", x => x.StatusId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -208,19 +227,18 @@ namespace KaidAPI.Migrations
                 name: "ProjectTasks",
                 columns: table => new
                 {
-                    TaskId = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TaskId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     TaskName = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     TaskDescription = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Assignee = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    StatusId = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StatusId = table.Column<int>(type: "int", nullable: false),
                     Priority = table.Column<int>(type: "int", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     ProjectId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     TeamId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
                 },
@@ -241,6 +259,17 @@ namespace KaidAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "TaskStatuses",
+                columns: new[] { "StatusId", "StatusDescription", "StatusName" },
+                values: new object[,]
+                {
+                    { 1, "To Do", "Todo" },
+                    { 2, "Work in Progress", "Work in Progress" },
+                    { 3, "Delayed", "Delayed" },
+                    { 4, "Finished", "Finished" }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Flags_OwnerId",
@@ -312,6 +341,9 @@ namespace KaidAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProjectTasks");
+
+            migrationBuilder.DropTable(
+                name: "TaskStatuses");
 
             migrationBuilder.DropTable(
                 name: "Roles");

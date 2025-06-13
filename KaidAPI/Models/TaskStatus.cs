@@ -21,6 +21,8 @@ public class TaskStatusConfiguration : IEntityTypeConfiguration<TaskStatus>
 {
     public void Configure(EntityTypeBuilder<TaskStatus> builder)
     {
+        builder.HasKey(ts => ts.StatusId);
+
         builder.HasData(
             new TaskStatus 
             { 
