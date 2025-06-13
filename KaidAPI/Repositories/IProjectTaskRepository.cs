@@ -6,10 +6,10 @@ namespace KaidAPI.Repositories;
 public interface IProjectTaskRepository
 {
     Task<Guid> CreateProjectTaskAsync(ProjectTaskRequest request);
-    Task<ProjectTask?> GetProjectTaskByIdAsync(string taskId);
+    Task<ProjectTask?> GetProjectTaskByIdAsync(Guid taskId);
     Task<List<ProjectTask>> GetAllProjectTasksAsync();
     Task UpdateProjectTaskAsync(ProjectTask task);
-    Task DeleteProjectTaskAsync(string taskId);
+    Task DeleteProjectTaskAsync(Guid taskId);
     Task<IEnumerable<ProjectTask>> GetProjectTasksByTeamAsync(string teamName);
     Task<IEnumerable<ProjectTask>> GetProjectTasksByTeamIdAsync(Guid teamId);
     Task<IEnumerable<ProjectTask>> GetAssignedTasksAsync(Guid userId);

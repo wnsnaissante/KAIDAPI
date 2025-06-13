@@ -37,7 +37,7 @@ public class ProjectTaskRepository : IProjectTaskRepository
         return task.TaskId;
     }
 
-    public async Task<ProjectTask> GetProjectTaskByIdAsync(string taskId)
+    public async Task<ProjectTask> GetProjectTaskByIdAsync(Guid taskId)
     {
         return await _context.ProjectTasks.FindAsync(taskId);
     }
@@ -65,7 +65,7 @@ public class ProjectTaskRepository : IProjectTaskRepository
         }
     }
 
-    public async Task DeleteProjectTaskAsync(string taskId)
+    public async Task DeleteProjectTaskAsync(Guid taskId)
     {
         var task = await _context.ProjectTasks.FindAsync(taskId);
         if (task != null)

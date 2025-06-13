@@ -31,7 +31,7 @@ public class FlagController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("delete")]
+    [HttpDelete("delete")]
     public async Task<IActionResult> DeleteFlagAsync([FromQuery] Guid flagId)
     {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");

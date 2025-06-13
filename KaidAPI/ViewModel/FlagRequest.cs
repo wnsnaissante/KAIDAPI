@@ -8,6 +8,7 @@ public class FlagRequest
     public string FlagDescription { get; set; }
     public FlagStatus Status { get; set; }
     public int Priority { get; set; }
+    public Guid? TeamId { get; set; }
 }
 
 

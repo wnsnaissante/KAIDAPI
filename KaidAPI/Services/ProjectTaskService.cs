@@ -71,7 +71,7 @@ namespace KaidAPI.Services
             }
         }
 
-        public async Task<ProjectTask?> GetProjectTaskByIdAsync(string taskId)
+        public async Task<ProjectTask?> GetProjectTaskByIdAsync(Guid taskId)
         {
             return await _taskRepository.GetProjectTaskByIdAsync(taskId);
         }
@@ -99,7 +99,7 @@ namespace KaidAPI.Services
             }
         }
 
-        public async Task<OperationResult> DeleteProjectTaskAsync(string taskId, string oidcSub)
+        public async Task<OperationResult> DeleteProjectTaskAsync(Guid taskId, string oidcSub)
         {
             try
             {

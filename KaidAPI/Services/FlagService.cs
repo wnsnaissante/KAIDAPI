@@ -21,12 +21,15 @@ public class FlagService : IFlagService
     {
         var flag = new Flag
         {
+            ProjectId = flagRequest.ProjectId,
             FlagId = Guid.NewGuid(),
             FlagDescription = flagRequest.FlagDescription,
             Status = FlagStatus.Todo,
-            Reporter = (await _userRepository.GetUserByOidcAsync(oidcSub)).UserId,
+            Reporter = ((await _userRepository.GetUserByOidcAsync(oidcSub)).UserId),
             CreatedAt = DateTime.UtcNow,
-            Priority = flagRequest.Priority
+            Priority = 1,
+            OwnerId = (Guid)((await _membershipRepository.GetMembershipByProjectIdAndUserIdAsync(flagRequest.ProjectId, (await _userRepository.GetUserByOidcAsync(oidcSub)).UserId)).SuperiorId),
+            TeamId = (Guid)flagRequest.TeamId
         };
 
         return await _flagRepository.CreateFlagAsync(flag);
@@ -101,7 +104,9 @@ public class FlagService : IFlagService
         var flag = await _flagRepository.GetFlagByFlagIdAsync(flagId);
         var user = await _userRepository.GetUserByOidcAsync(oidcSub);
 
-        return new OperationResult();
+        await _flagRepository.DeleteFlagAsync(flagId);
+
+        return new OperationResult { Success = true, Message = "Flag deleted successfully" };
     }
 
     public async Task<OperationResult> GetFlagsByProjectAsync(string oidcSub, Guid projectId)

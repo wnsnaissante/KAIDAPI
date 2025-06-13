@@ -36,7 +36,7 @@ public class ProjectTaskController : ControllerBase
     }
 
     [HttpGet("{taskId}")]
-    public async Task<IActionResult> GetTaskById(string taskId)
+    public async Task<IActionResult> GetTaskById(Guid taskId)
     {
         var task = await _taskService.GetProjectTaskByIdAsync(taskId);
         if (task == null) return NotFound();
@@ -68,7 +68,7 @@ public class ProjectTaskController : ControllerBase
     }
 
     [HttpDelete("{taskId}")]
-    public async Task<IActionResult> DeleteTask(string taskId)
+    public async Task<IActionResult> DeleteTask(Guid taskId)
     {
         var oidcSub = User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 
