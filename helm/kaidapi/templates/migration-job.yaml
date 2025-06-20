@@ -14,11 +14,7 @@ spec:
           command: ["dotnet", "ef", "database", "update", "--project", "KaidAPI/KaidAPI.csproj"]
           workingDir: /app
           env:
-            - name: ASPNETCORE_ENVIRONMENT
-              value: {{ .Values.env.ASPNETCORE_ENVIRONMENT | quote }}
-            {{- with .Values.env.extra }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
+            {{- toYaml .Values.env | nindent 12 }}
           envFrom:
             - secretRef:
                 name: {{ include "kaidapi.fullname" . }}-secrets
