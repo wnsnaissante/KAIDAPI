@@ -22,7 +22,7 @@ spec:
               dotnet tool install --global dotnet-ef && \
               export PATH="$PATH:/root/.dotnet/tools" && \
               dotnet ef database update --project KaidAPI.csproj
-          workingDir: /src/KaidAPI
+          workingDir: /
           env:
             {{- toYaml .Values.env | nindent 12 }}
           envFrom:
