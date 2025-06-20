@@ -17,6 +17,6 @@ spec:
             {{- toYaml .Values.env | nindent 12 }}
           envFrom:
             - secretRef:
-                name: {{ include "kaidapi.fullname" . }}-secrets
+                name: kaidapi-secrets
       restartPolicy: Never
   backoffLimit: 1 
