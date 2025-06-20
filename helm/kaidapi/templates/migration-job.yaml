@@ -11,7 +11,13 @@ spec:
         - name: migrate
           image: mcr.microsoft.com/dotnet/sdk:8.0
           imagePullPolicy: IfNotPresent
-          command: ["dotnet", "ef", "database", "update", "--project", "KaidAPI/KaidAPI.csproj"]
+          command:
+            - /bin/sh
+            - -c
+            - |
+              dotnet tool install --global dotnet-ef && \
+              export PATH="$PATH:/root/.dotnet/tools" && \
+              dotnet ef database update --project KaidAPI/KaidAPI.csproj
           workingDir: /app
           env:
             {{- toYaml .Values.env | nindent 12 }}
