@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using KaidAPI.Models;
@@ -14,8 +15,8 @@ public class Membership
     public Guid? SuperiorId { get; set; }
     [Required]
     public int RoleId { get; set; }
-    [Required]
-    public bool IsActivated { get; set; } = false;
+    
+    public bool IsActivated { get; set; }
 
     public Guid? TeamId { get; set; }
     public DateTime JoinedAt { get; set; }

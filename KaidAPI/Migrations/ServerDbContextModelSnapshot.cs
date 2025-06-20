@@ -302,7 +302,9 @@ namespace KaidAPI.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<bool>("IsActivated")
-                        .HasColumnType("tinyint(1)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("datetime(6)");

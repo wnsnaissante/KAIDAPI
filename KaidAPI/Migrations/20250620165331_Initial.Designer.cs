@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KaidAPI.Migrations
 {
     [DbContext(typeof(ServerDbContext))]
-    [Migration("20250620163518_Initial")]
+    [Migration("20250620165331_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -305,7 +305,9 @@ namespace KaidAPI.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<bool>("IsActivated")
-                        .HasColumnType("tinyint(1)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("datetime(6)");

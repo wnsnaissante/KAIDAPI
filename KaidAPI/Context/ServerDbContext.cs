@@ -22,6 +22,9 @@ public class ServerDbContext: DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Membership>()
+            .Property(m => m.IsActivated)
+            .HasDefaultValue(false);
         modelBuilder.ApplyConfiguration(new TaskStatusConfiguration());
     }
 }
