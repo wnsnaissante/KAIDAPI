@@ -266,8 +266,7 @@ namespace KaidAPI.Migrations
                     { 1, "To Do", "Todo" },
                     { 2, "Work in Progress", "Work in Progress" },
                     { 3, "Delayed", "Delayed" },
-                    { 4, "Finished", "Finished" },
-                    { 5, "Done", "Done" }
+                    { 4, "Finished", "Finished" }
                 });
 
             migrationBuilder.CreateIndex(
