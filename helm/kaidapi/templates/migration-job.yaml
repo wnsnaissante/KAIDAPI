@@ -9,8 +9,8 @@ spec:
     spec:
       containers:
         - name: migrate
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: mcr.microsoft.com/dotnet/sdk:8.0
+          imagePullPolicy: IfNotPresent
           command: ["dotnet", "ef", "database", "update", "--project", "KaidAPI/KaidAPI.csproj"]
           workingDir: /app
           env:
