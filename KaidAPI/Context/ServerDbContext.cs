@@ -26,5 +26,6 @@ public class ServerDbContext: DbContext
             .Property(m => m.IsActivated)
             .HasDefaultValue(false);
         modelBuilder.ApplyConfiguration(new TaskStatusConfiguration());
+        modelBuilder.ApplyConfiguration(new RoleConfiguration());
     }
 }
