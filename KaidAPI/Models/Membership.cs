@@ -11,7 +11,6 @@ public class Membership
     public Guid ProjectId { get; set; }
     [Required]
     public Guid UserId { get; set; }
-    [Required]
     public Guid? SuperiorId { get; set; }
     [Required]
     public int RoleId { get; set; }
@@ -33,6 +32,7 @@ public class Membership
     [ForeignKey("SuperiorId")]
     public User Superior { get; set; }
     
+    [Required]
     [MaxLength(20)]
     public string Status { get; set; }
 }
