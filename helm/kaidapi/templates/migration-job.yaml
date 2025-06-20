@@ -15,10 +15,13 @@ spec:
             - /bin/sh
             - -c
             - |
+              apt-get update && apt-get install -y git && \
+              git clone https://github.com/wnsnaissante/KaidAPI.git /src && \
+              cd /src/KaidAPI && \
               dotnet tool install --global dotnet-ef && \
               export PATH="$PATH:/root/.dotnet/tools" && \
-              dotnet ef database update --project KaidAPI/KaidAPI.csproj
-          workingDir: /app
+              dotnet ef database update --project KaidAPI.csproj
+          workingDir: /src/KaidAPI
           env:
             {{- toYaml .Values.env | nindent 12 }}
           envFrom:
