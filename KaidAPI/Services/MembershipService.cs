@@ -125,25 +125,21 @@ public class MembershipService : IMembershipService
             Data = matchedMemberships
         }; 
     }
-    
+
     public async Task<OperationResult> GetMembershipAsync(string oidcSub, Guid projectId, Guid teamId, Guid userId)
     {
         var user = await _userRepository.GetUserByOidcAsync(oidcSub);
         if (user == null)
-        {
-            return new OperationResult
-            {
-                Success = false,
-                Message = "User not found"
-            };
-        }
+            return new OperationResult { Success = false, Message = "User not found" };
 
         var allMemberships = await _membershipRepository.GetAllMembershipsAsync();
+        var matchedMemberships = allMemberships.Where(m =>
+            m.ProjectId == projectId &&
+            m.TeamId == teamId &&
+            m.UserId == userId
+        ).ToList();
 
-        var matchedMembership = allMemberships
-            .Where(m => m.ProjectId == projectId && m.TeamId == teamId && m.UserId == userId);
-
-        if (matchedMembership == null)
+        if (matchedMemberships.Count == 0)
         {
             return new OperationResult
             {
@@ -156,7 +152,7 @@ public class MembershipService : IMembershipService
         {
             Success = true,
             Message = "Success to find Membership",
-            Data = matchedMembership
+            Data = matchedMemberships
         };
     }
 
