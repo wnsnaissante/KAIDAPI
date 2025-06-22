@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion; // ValueConverter를 위해 추가
 
 namespace KaidAPI;
 
@@ -29,45 +30,27 @@ public class Program
             options.AddDefaultPolicy(
                 policy =>
                 {
-                    policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
+                    policy.AllowAnyOrigin() 
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
                 });
         });
         
         builder.Services.AddScoped<IKaidUserService, KaidUserService>();
-        
         builder.Services.AddScoped<IUserRepository, UserRepository>();
-
         builder.Services.AddScoped<IProjectService, ProjectService>();
         builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
         builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
         builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
-        builder.Services.AddScoped<IFlagService, FlagService>();
-        builder.Services.AddScoped<IFlagRepository, FlagRepository>();
-        builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-        builder.Services.AddScoped<ITeamRepository, TeamRepository>();
-        builder.Services.AddScoped<ITeamService, TeamService>();
-        builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-        builder.Services.AddScoped<ICommentService, CommentService>();
-        builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
-
-        builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
         builder.Services.AddScoped<IMembershipService, MembershipService>();
-
         builder.Services.AddScoped<IFlagService, FlagService>();
         builder.Services.AddScoped<IFlagRepository, FlagRepository>();
-
-        builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-
-        builder.Services.AddScoped<ITeamRepository, TeamRepository>();
-        builder.Services.AddScoped<ITeamService, TeamService>();
-
-        builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-        builder.Services.AddScoped<ICommentService, CommentService>();
-
+        builder.Services.AddScoped<IRoleRepository, RoleRepository>(); 
+        builder.Services.AddScoped<ITeamRepository, TeamRepository>(); 
+        builder.Services.AddScoped<ITeamService, TeamService>(); 
+        builder.Services.AddScoped<ICommentRepository, CommentRepository>(); 
+        builder.Services.AddScoped<ICommentService, CommentService>(); 
         builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
-        builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
 
         builder.Services.AddAuthentication(options =>
             {
@@ -77,7 +60,6 @@ public class Program
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => 
             {
                 options.Authority = oidcConfig["Authority"];
-
                 options.Audience = oidcConfig["ClientId"]; 
 
                 if (builder.Environment.IsDevelopment())
@@ -94,7 +76,6 @@ public class Program
                     options.RequireHttpsMetadata = true; 
                 }
 
-
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -108,7 +89,6 @@ public class Program
                 {
                     OnTokenValidated = async context => 
                     {
-                        
                         var userService = context.HttpContext.RequestServices.GetRequiredService<IKaidUserService>();
                         var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
                         var logger = loggerFactory.CreateLogger("JwtBearerEvents.OnTokenValidated");
@@ -184,20 +164,18 @@ public class Program
         app.UseHttpsRedirection();
         app.UseRouting();
 
-        app.UseCors();
+        app.UseCors(); 
 
         using (var scope = app.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ServerDbContext>();
-            db.Database.Migrate();
+            db.Database.Migrate(); 
         }
 
-        app.UseAuthentication(); 
+        app.UseAuthentication();
         app.UseAuthorization(); 
-        
-        app.MapMethods("/{**catch-all}", new[] { "OPTIONS" }, () => Results.Ok())
-           .AllowAnonymous();
-        
+
+
         app.MapControllers().RequireAuthorization(); 
 
         app.Run();
