@@ -214,4 +214,43 @@ public class MembershipRepositoryTests
         Assert.Equal(updatedMembership.IsActivated, reloaded.IsActivated);
         Assert.Equal("UpdatedStatus", reloaded.Status);
     }
+
+    [Fact]
+    public async Task GetMembershipsWithNullNullableGuids_ShouldNotThrowAndReturnCorrectData()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ServerDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        var context = new ServerDbContext(options);
+
+        var userId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+
+        // SuperiorId와 TeamId를 null로 둔 Membership 추가
+        context.Memberships.Add(new Membership
+        {
+            ProjectMembershipId = Guid.NewGuid(),
+            UserId = userId,
+            ProjectId = Guid.NewGuid(),
+            IsActivated = true,
+            Status = "Activated",
+            RoleId = 1,
+            SuperiorId = null,
+            TeamId = null
+        });
+
+        await context.SaveChangesAsync();
+
+        var repository = new MembershipRepository(context);
+
+        // Act
+        var memberships = await repository.GetMembershipsByUserIdAsync(userId);
+
+        // Assert
+        Assert.Single(memberships);
+        var membership = memberships.First();
+        Assert.Null(membership.SuperiorId);
+        Assert.Null(membership.TeamId);
+    }
 }

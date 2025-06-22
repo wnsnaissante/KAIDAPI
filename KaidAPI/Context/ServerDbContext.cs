@@ -5,10 +5,10 @@ using TaskStatus = KaidAPI.Models.TaskStatus;
 
 namespace KaidAPI.Context;
 
-public class ServerDbContext: DbContext
+public class ServerDbContext : DbContext
 {
     public ServerDbContext(DbContextOptions<ServerDbContext> options) : base(options) { }
-    
+
     public DbSet<User> Users { get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectTask> ProjectTasks { get; set; }
@@ -22,9 +22,30 @@ public class ServerDbContext: DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Membership>()
-            .Property(m => m.IsActivated)
-            .HasDefaultValue(false);
+
+        // Membership 엔티티 설정
+        modelBuilder.Entity<Membership>(entity =>
+        {
+            entity.Property(m => m.IsActivated)
+                  .HasDefaultValue(false);
+
+            entity.Property(m => m.ProjectMembershipId)
+                  .HasColumnType("char(36)");
+
+            entity.Property(m => m.ProjectId)
+                  .HasColumnType("char(36)");
+
+            entity.Property(m => m.UserId)
+                  .HasColumnType("char(36)");
+
+            entity.Property(m => m.SuperiorId)
+                  .HasColumnType("char(36)");
+
+            entity.Property(m => m.TeamId)
+                  .HasColumnType("char(36)");
+        });
+
+        // 다른 엔티티 구성 (예: TaskStatus, Role)
         modelBuilder.ApplyConfiguration(new TaskStatusConfiguration());
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
     }

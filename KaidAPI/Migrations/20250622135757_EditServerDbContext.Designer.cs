@@ -4,6 +4,7 @@ using KaidAPI.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KaidAPI.Migrations
 {
     [DbContext(typeof(ServerDbContext))]
-    partial class ServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250622135757_EditServerDbContext")]
+    partial class EditServerDbContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,8 +212,6 @@ namespace KaidAPI.Migrations
                     b.HasKey("TaskId");
 
                     b.HasIndex("ProjectId");
-
-                    b.HasIndex("StatusId");
 
                     b.HasIndex("TeamId");
 
@@ -441,12 +442,6 @@ namespace KaidAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("KaidAPI.Models.TaskStatus", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("KaidAPI.Models.Team", "Team")
                         .WithMany()
                         .HasForeignKey("TeamId")
@@ -454,8 +449,6 @@ namespace KaidAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Project");
-
-                    b.Navigation("Status");
 
                     b.Navigation("Team");
                 });

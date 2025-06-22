@@ -11,6 +11,7 @@ public class ProjectTask
     public string TaskDescription { get; set; }
     public Guid Assignee { get; set; }
     public int StatusId { get; set; }
+    public TaskStatus Status { get; set; }
     public int Priority { get; set; }
     public DateTime DueDate { get; set; }
     public DateTime CreatedAt { get; set; }
