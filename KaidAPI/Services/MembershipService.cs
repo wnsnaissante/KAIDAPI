@@ -32,7 +32,7 @@ public class MembershipService : IMembershipService
             UserId = memberRequest.UserId,
             JoinedAt = DateTime.UtcNow,
             RoleId = memberRequest.RoleId,
-            SuperiorId = memberRequest.SuperiorId,
+            SuperiorId = memberRequest.SuperiorId ?? memberRequest.UserId, // 자기 자신을 SuperiorId로 설정
         };
         
         await _membershipRepository.CreateMembershipAsync(newMember);
