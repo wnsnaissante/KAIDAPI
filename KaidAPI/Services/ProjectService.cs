@@ -57,7 +57,12 @@ public class ProjectService : IProjectService
                 SuperiorId = user.UserId
             };
             
+            _logger.LogInformation("Creating membership - UserId: {UserId}, SuperiorId: {SuperiorId}, ProjectId: {ProjectId}", 
+                membership.UserId, membership.SuperiorId, membership.ProjectId);
+            
             await _membershipRepository.CreateMembershipAsync(membership);
+            
+            _logger.LogInformation("=== PROJECT CREATION DEBUG END ===");
 
             return new OperationResult
             {
@@ -81,10 +86,17 @@ public class ProjectService : IProjectService
     {
         try
         {
+            _logger.LogInformation("=== PROJECT CREATION DEBUG START ===");
+            _logger.LogInformation("OidcSub received: {OidcSub}", oidcSub);
+            
             var user = await _userRepository.GetUserByOidcAsync(oidcSub);
+            
+            _logger.LogInformation("User lookup result - Found: {UserFound}, UserId: {UserId}", 
+                user != null, user?.UserId);
 
             if (user is null)
             {
+                _logger.LogError("User not found for OidcSub: {OidcSub}", oidcSub);
                 return new OperationResult { Success = false, Message = "User not found" };
             }
 
