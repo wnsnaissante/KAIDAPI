@@ -17,7 +17,7 @@ namespace KaidAPI.Models
         [Required]
         public int RoleId { get; set; }
 
-        public bool IsActivated { get; set; }
+        public bool? IsActivated { get; set; }
 
         public Guid? TeamId { get; set; }
         public DateTime JoinedAt { get; set; }

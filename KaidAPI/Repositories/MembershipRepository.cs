@@ -23,13 +23,17 @@ public class MembershipRepository : IMembershipRepository
 
     public async Task<List<Membership>> GetActivatedMembershipsByUserIdAsync(Guid userId)
     {
-        var memberships = await _context.Memberships.Where(x => x.UserId == userId && x.IsActivated == true).ToListAsync();
+        var memberships = await _context.Memberships
+            .Where(x => x.UserId == userId && (x.IsActivated == true || x.IsActivated == null))
+            .ToListAsync();
         return memberships;
     }
 
     public async Task<List<Membership>> GetDeactivatedMembershipsByUserIdAsync(Guid userId)
     {
-        var memberships = await _context.Memberships.Where(x => x.UserId == userId && x.IsActivated == false).ToListAsync();
+        var memberships = await _context.Memberships
+            .Where(x => x.UserId == userId && x.IsActivated == false)
+            .ToListAsync();
         return memberships;
     }
 
@@ -46,7 +50,9 @@ public class MembershipRepository : IMembershipRepository
 
     public async Task<List<Membership>> GetMembershipsByUserIdAsync(Guid userId)
     {
-        var memberships = await _context.Memberships.Where(x => x.UserId == userId && x.IsActivated == true).ToListAsync();
+        var memberships = await _context.Memberships
+            .Where(x => x.UserId == userId && (x.IsActivated == true || x.IsActivated == null))
+            .ToListAsync();
         return memberships;
     }
 
