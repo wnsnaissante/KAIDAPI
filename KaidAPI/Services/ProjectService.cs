@@ -177,35 +177,50 @@ public class ProjectService : IProjectService
     {
         try
         {
+            _logger.LogInformation("Getting projects for user with oidcSub: {OidcSub}", oidcSub);
+            
             var user = await _userRepository.GetUserByOidcAsync(oidcSub);
             if (user is null)
             {
+                _logger.LogWarning("User not found with oidcSub: {OidcSub}", oidcSub);
                 return new OperationResult { Success = false, Message = "User not found" };
             }
+            
+            _logger.LogInformation("Found user: {UserId}", user.UserId);
             var projects = new List<ProjectResponse>();
             
             var memberships = await _membershipRepository.GetActivatedMembershipsByUserIdAsync(user.UserId);
+            _logger.LogInformation("Found {MembershipCount} memberships for user: {UserId}", memberships.Count, user.UserId);
             
             foreach (var membership in memberships)
             {
                 var project = await _projectRepository.GetProjectByIdAsync(membership.ProjectId);
+                
+                if (project == null)
+                {
+                    _logger.LogWarning("Project not found for ProjectId: {ProjectId} in membership: {MembershipId}", 
+                        membership.ProjectId, membership.ProjectMembershipId);
+                    continue;
+                }
+                
                 var projectResponse = new ProjectResponse
                 {
                     ProjectId = project.ProjectId,
                     ProjectName = project.ProjectName,
                     ProjectDescription = project.ProjectDescription,
                     DueDate = project.DueDate,
-                    OwnerId = user.UserId,
+                    OwnerId = project.OwnerId,
                     CreatedAt = project.CreatedAt
                 };
                 projects.Add(projectResponse);
             }
 
+            _logger.LogInformation("Successfully retrieved {ProjectCount} projects for user: {UserId}", projects.Count, user.UserId);
             return new OperationResult { Success = true, Message = "Projects retrieved successfully", Data = projects };
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Projects get Failed");
+            _logger.LogError(exception, "Projects get Failed for oidcSub: {OidcSub}", oidcSub);
             return new OperationResult { Success = false, Message = "Error Get projects" };
         }
     }
