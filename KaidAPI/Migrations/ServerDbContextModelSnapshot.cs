@@ -43,7 +43,7 @@ namespace KaidAPI.Migrations
 
                     b.HasKey("CommentId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("KaidAPI.Models.Flag", b =>
@@ -85,7 +85,7 @@ namespace KaidAPI.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("Flags");
+                    b.ToTable("Flags", (string)null);
                 });
 
             modelBuilder.Entity("KaidAPI.Models.Membership", b =>
@@ -132,7 +132,7 @@ namespace KaidAPI.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("Memberships");
+                    b.ToTable("Memberships", (string)null);
                 });
 
             modelBuilder.Entity("KaidAPI.Models.Project", b =>
@@ -162,7 +162,7 @@ namespace KaidAPI.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("KaidAPI.Models.ProjectTask", b =>
@@ -214,7 +214,7 @@ namespace KaidAPI.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("ProjectTasks");
+                    b.ToTable("ProjectTasks", (string)null);
                 });
 
             modelBuilder.Entity("KaidAPI.Models.Role", b =>
@@ -235,7 +235,7 @@ namespace KaidAPI.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -276,7 +276,7 @@ namespace KaidAPI.Migrations
 
                     b.HasKey("StatusId");
 
-                    b.ToTable("TaskStatuses");
+                    b.ToTable("TaskStatuses", (string)null);
 
                     b.HasData(
                         new
@@ -329,7 +329,7 @@ namespace KaidAPI.Migrations
 
                     b.HasIndex("LeaderId");
 
-                    b.ToTable("Teams");
+                    b.ToTable("Teams", (string)null);
                 });
 
             modelBuilder.Entity("KaidAPI.Models.User", b =>
@@ -361,7 +361,7 @@ namespace KaidAPI.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("KaidAPI.Models.Flag", b =>

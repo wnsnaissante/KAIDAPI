@@ -1,52 +1,50 @@
-﻿using System.Collections.Immutable;
+﻿using System;
 using KaidAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using TaskStatus = KaidAPI.Models.TaskStatus;
 
-namespace KaidAPI.Context;
-
-public class ServerDbContext : DbContext
+namespace KaidAPI.Context
 {
-    public ServerDbContext(DbContextOptions<ServerDbContext> options) : base(options) { }
-
-    public DbSet<User> Users { get; set; }
-    public DbSet<Project> Projects { get; set; }
-    public DbSet<ProjectTask> ProjectTasks { get; set; }
-    public DbSet<Team> Teams { get; set; }
-    public DbSet<Membership> Memberships { get; set; }
-    public DbSet<Flag> Flags { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<Comment> Comments { get; set; }
-    public DbSet<TaskStatus> TaskStatuses { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class ServerDbContext : DbContext
     {
-        base.OnModelCreating(modelBuilder);
+        public ServerDbContext(DbContextOptions<ServerDbContext> options) : base(options) { }
 
-        // Membership 엔티티 설정
-        modelBuilder.Entity<Membership>(entity =>
+        public DbSet<User> Users { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<ProjectTask> ProjectTasks { get; set; }
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<Membership> Memberships { get; set; }
+        public DbSet<Flag> Flags { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<KaidAPI.Models.TaskStatus> TaskStatuses { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            entity.Property(m => m.IsActivated)
-                  .HasDefaultValue(false);
+            base.OnModelCreating(modelBuilder);
 
-            entity.Property(m => m.ProjectMembershipId)
-                  .HasColumnType("char(36)");
+            modelBuilder.Entity<Membership>(entity =>
+            {
+                entity.Property(m => m.IsActivated)
+                      .HasDefaultValue(false);
 
-            entity.Property(m => m.ProjectId)
-                  .HasColumnType("char(36)");
+                entity.Property(m => m.ProjectMembershipId)
+                      .HasColumnType("char(36)");
 
-            entity.Property(m => m.UserId)
-                  .HasColumnType("char(36)");
+                entity.Property(m => m.ProjectId)
+                      .HasColumnType("char(36)");
 
-            entity.Property(m => m.SuperiorId)
-                  .HasColumnType("char(36)");
+                entity.Property(m => m.UserId)
+                      .HasColumnType("char(36)");
 
-            entity.Property(m => m.TeamId)
-                  .HasColumnType("char(36)");
-        });
+                entity.Property(m => m.SuperiorId)
+                      .HasColumnType("char(36)");
 
-        // 다른 엔티티 구성 (예: TaskStatus, Role)
-        modelBuilder.ApplyConfiguration(new TaskStatusConfiguration());
-        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+                entity.Property(m => m.TeamId)
+                      .HasColumnType("char(36)");
+            });
+
+            modelBuilder.ApplyConfiguration(new TaskStatusConfiguration());
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        }
     }
 }

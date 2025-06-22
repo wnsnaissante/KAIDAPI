@@ -11,17 +11,13 @@ namespace KaidAPI.Context
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile("appsettings.json")
                 .Build();
+
+            var optionsBuilder = new DbContextOptionsBuilder<ServerDbContext>();
 
             var connectionString = configuration.GetConnectionString("MySql");
 
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new InvalidOperationException("Connection string 'MySql' is missing or empty in appsettings.json.");
-            }
-
-            var optionsBuilder = new DbContextOptionsBuilder<ServerDbContext>();
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
             return new ServerDbContext(optionsBuilder.Options);
