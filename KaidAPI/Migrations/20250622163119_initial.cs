@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace KaidAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -184,7 +184,7 @@ namespace KaidAPI.Migrations
                     ProjectMembershipId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     ProjectId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    SuperiorId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    SuperiorId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
                     RoleId = table.Column<int>(type: "int", nullable: false),
                     IsActivated = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: false),
                     TeamId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
@@ -216,8 +216,7 @@ namespace KaidAPI.Migrations
                         name: "FK_Memberships_Users_SuperiorId",
                         column: x => x.SuperiorId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -250,6 +249,12 @@ namespace KaidAPI.Migrations
                         principalColumn: "ProjectId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_ProjectTasks_TaskStatuses_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "TaskStatuses",
+                        principalColumn: "StatusId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_ProjectTasks_Teams_TeamId",
                         column: x => x.TeamId,
                         principalTable: "Teams",
@@ -257,6 +262,16 @@ namespace KaidAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "RoleId", "RoleDescription", "RoleName" },
+                values: new object[,]
+                {
+                    { 1, "Project Administrator", "Admin" },
+                    { 2, "Team Manager", "Manager" },
+                    { 3, "Team Member", "Member" }
+                });
 
             migrationBuilder.InsertData(
                 table: "TaskStatuses",
@@ -315,6 +330,11 @@ namespace KaidAPI.Migrations
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProjectTasks_StatusId",
+                table: "ProjectTasks",
+                column: "StatusId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProjectTasks_TeamId",
                 table: "ProjectTasks",
                 column: "TeamId");
@@ -341,13 +361,13 @@ namespace KaidAPI.Migrations
                 name: "ProjectTasks");
 
             migrationBuilder.DropTable(
-                name: "TaskStatuses");
-
-            migrationBuilder.DropTable(
                 name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "TaskStatuses");
 
             migrationBuilder.DropTable(
                 name: "Teams");

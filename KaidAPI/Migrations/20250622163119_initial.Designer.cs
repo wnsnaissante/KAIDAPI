@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KaidAPI.Migrations
 {
     [DbContext(typeof(ServerDbContext))]
-    [Migration("20250620165331_Initial")]
-    partial class Initial
+    [Migration("20250622163119_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -91,6 +91,53 @@ namespace KaidAPI.Migrations
                     b.ToTable("Flags");
                 });
 
+            modelBuilder.Entity("KaidAPI.Models.Membership", b =>
+                {
+                    b.Property<Guid>("ProjectMembershipId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<bool>("IsActivated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<Guid?>("SuperiorId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("ProjectMembershipId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("SuperiorId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Memberships");
+                });
+
             modelBuilder.Entity("KaidAPI.Models.Project", b =>
                 {
                     b.Property<Guid>("ProjectId")
@@ -166,6 +213,8 @@ namespace KaidAPI.Migrations
 
                     b.HasIndex("ProjectId");
 
+                    b.HasIndex("StatusId");
+
                     b.HasIndex("TeamId");
 
                     b.ToTable("ProjectTasks");
@@ -190,6 +239,26 @@ namespace KaidAPI.Migrations
                     b.HasKey("RoleId");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            RoleDescription = "Project Administrator",
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            RoleDescription = "Team Manager",
+                            RoleName = "Manager"
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            RoleDescription = "Team Member",
+                            RoleName = "Member"
+                        });
                 });
 
             modelBuilder.Entity("KaidAPI.Models.TaskStatus", b =>
@@ -298,54 +367,6 @@ namespace KaidAPI.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Membership", b =>
-                {
-                    b.Property<Guid>("ProjectMembershipId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<bool>("IsActivated")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<Guid?>("SuperiorId")
-                        .IsRequired()
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid?>("TeamId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("ProjectMembershipId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("SuperiorId");
-
-                    b.HasIndex("TeamId");
-
-                    b.ToTable("Memberships");
-                });
-
             modelBuilder.Entity("KaidAPI.Models.Flag", b =>
                 {
                     b.HasOne("KaidAPI.Models.User", "Owner")
@@ -373,6 +394,37 @@ namespace KaidAPI.Migrations
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("KaidAPI.Models.Membership", b =>
+                {
+                    b.HasOne("KaidAPI.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KaidAPI.Models.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KaidAPI.Models.User", "Superior")
+                        .WithMany()
+                        .HasForeignKey("SuperiorId");
+
+                    b.HasOne("KaidAPI.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("Superior");
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("KaidAPI.Models.Project", b =>
                 {
                     b.HasOne("KaidAPI.Models.User", "Owner")
@@ -392,6 +444,12 @@ namespace KaidAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("KaidAPI.Models.TaskStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("KaidAPI.Models.Team", "Team")
                         .WithMany()
                         .HasForeignKey("TeamId")
@@ -399,6 +457,8 @@ namespace KaidAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Project");
+
+                    b.Navigation("Status");
 
                     b.Navigation("Team");
                 });
@@ -412,39 +472,6 @@ namespace KaidAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Leader");
-                });
-
-            modelBuilder.Entity("Membership", b =>
-                {
-                    b.HasOne("KaidAPI.Models.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KaidAPI.Models.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KaidAPI.Models.User", "Superior")
-                        .WithMany()
-                        .HasForeignKey("SuperiorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KaidAPI.Models.Team", "Team")
-                        .WithMany()
-                        .HasForeignKey("TeamId");
-
-                    b.Navigation("Project");
-
-                    b.Navigation("Role");
-
-                    b.Navigation("Superior");
-
-                    b.Navigation("Team");
                 });
 #pragma warning restore 612, 618
         }
