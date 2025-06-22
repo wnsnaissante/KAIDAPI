@@ -23,6 +23,18 @@ public class Program
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
         
         builder.Services.AddControllers();
+        
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(
+                policy =>
+                {
+                    policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+        });
+        
         builder.Services.AddScoped<IKaidUserService, KaidUserService>();
         
         builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -171,6 +183,8 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseRouting();
+
+        app.UseCors();
 
         using (var scope = app.Services.CreateScope())
         {
