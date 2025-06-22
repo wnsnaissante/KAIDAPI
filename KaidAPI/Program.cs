@@ -195,6 +195,9 @@ public class Program
         app.UseAuthentication(); 
         app.UseAuthorization(); 
         
+        app.MapMethods("/{**catch-all}", new[] { "OPTIONS" }, () => Results.Ok())
+           .AllowAnonymous();
+        
         app.MapControllers().RequireAuthorization(); 
 
         app.Run();
